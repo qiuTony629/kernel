@@ -495,7 +495,7 @@
 			remote-endpoint = <&isp0_vir0>;
 		};
 	};
-;
+};
 
 &rkcif_mmu {
 	status = "okay";
