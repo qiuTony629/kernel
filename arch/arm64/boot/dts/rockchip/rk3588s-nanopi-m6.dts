@@ -499,7 +499,7 @@
 
 &rkcif_mmu {
 	status = "okay";
-;
+};
 
 &isp0_mmu {
 	status = "okay";
