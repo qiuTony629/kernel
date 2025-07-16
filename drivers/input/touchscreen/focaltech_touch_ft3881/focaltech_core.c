@@ -1905,7 +1905,7 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
     return 0;
 }
 
-static int fts_ts_suspend(struct device *dev)
+static __maybe_unused int fts_ts_suspend(struct device *dev)
 {
     struct fts_ts_data *ts_data = fts_data;
 
