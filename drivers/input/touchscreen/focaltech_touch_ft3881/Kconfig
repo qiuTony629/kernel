@@ -1,0 +1,10 @@
+#
+# Focaltech Touchscreen driver configuration
+#
+
+config TOUCHSCREEN_FT3881
+    tristate "Focaltech Touchscreen FT3881"
+    default m
+    help
+      Say Y here if you have Focaltech touch panel.
+      If unsure, say N.
