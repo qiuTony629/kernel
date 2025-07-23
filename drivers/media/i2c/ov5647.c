@@ -325,7 +325,7 @@ static struct regval_list ov5647_1080p30_10bpp[] = {
 	{0x3503, 0x03},
 	{0x0100, 0x01},
 };
-
+/*
 static struct regval_list ov5647_2x2binned_10bpp[] = {
 	{0x0100, 0x00},
 	{0x0103, 0x01},
@@ -418,7 +418,7 @@ static struct regval_list ov5647_2x2binned_10bpp[] = {
 	{0x3212, 0xa0},
 	{0x0100, 0x01},
 };
-
+*/
 static struct regval_list ov5647_640x480_10bpp[] = {
 	{0x0100, 0x00},
 	{0x0103, 0x01},
@@ -571,7 +571,7 @@ static const struct ov5647_mode ov5647_modes[] = {
 		.num_regs	= ARRAY_SIZE(ov5647_1080p30_10bpp)
 	},
 	/* 2x2 binned full FOV 10-bit mode. */
-	{
+	/*{
 		.format = {
 			.code		= MEDIA_BUS_FMT_SBGGR10_1X10,
 			.colorspace	= V4L2_COLORSPACE_RAW,
@@ -595,7 +595,7 @@ static const struct ov5647_mode ov5647_modes[] = {
 		.link_freq_index = 2,
 		.reg_list	= ov5647_2x2binned_10bpp,
 		.num_regs	= ARRAY_SIZE(ov5647_2x2binned_10bpp)
-	},
+	},*/
 	/* 10-bit VGA full FOV 60fps. 2x2 binned and subsampled down to VGA. */
 	{
 		.format = {
@@ -625,8 +625,8 @@ static const struct ov5647_mode ov5647_modes[] = {
 };
 
 /* Default sensor mode is 2x2 binned 640x480 SBGGR10_1X10. */
-#define OV5647_DEFAULT_MODE	(&ov5647_modes[0])
-#define OV5647_DEFAULT_FORMAT	(ov5647_modes[0].format)
+#define OV5647_DEFAULT_MODE	(&ov5647_modes[1])
+#define OV5647_DEFAULT_FORMAT	(ov5647_modes[1].format)
 
 static int ov5647_write16(struct v4l2_subdev *sd, u16 reg, u16 val)
 {
