@@ -529,7 +529,7 @@ static const struct ov5647_mode ov5647_modes[] = {
 		},
 		.max_fps = {
 			.numerator = 10000,
-			.denominator = 150000,
+			.denominator = 300000,
 		},
 		.crop = {
 			.left		= OV5647_PIXEL_ARRAY_LEFT,
@@ -625,7 +625,7 @@ static const struct ov5647_mode ov5647_modes[] = {
 };
 
 /* Default sensor mode is 2x2 binned 640x480 SBGGR10_1X10. */
-#define OV5647_DEFAULT_MODE	(&ov5647_modes[2])
+#define OV5647_DEFAULT_MODE	(&ov5647_modes[0])
 #define OV5647_DEFAULT_FORMAT	(ov5647_modes[0].format)
 
 static int ov5647_write16(struct v4l2_subdev *sd, u16 reg, u16 val)
