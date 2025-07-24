@@ -625,8 +625,8 @@ static const struct ov5647_mode ov5647_modes[] = {
 };
 
 /* Default sensor mode is 2x2 binned 640x480 SBGGR10_1X10. */
-#define OV5647_DEFAULT_MODE	(&ov5647_modes[0])
-#define OV5647_DEFAULT_FORMAT	(ov5647_modes[0].format)
+#define OV5647_DEFAULT_MODE	(&ov5647_modes[2])
+#define OV5647_DEFAULT_FORMAT	(ov5647_modes[2].format)
 
 static int ov5647_write16(struct v4l2_subdev *sd, u16 reg, u16 val)
 {
@@ -1245,11 +1245,11 @@ static int ov5647_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 				v4l2_subdev_get_try_format(sd, fh->state, 0);
 	struct v4l2_rect *crop = v4l2_subdev_get_try_crop(sd, fh->state, 0);
 
-	crop->left = OV5647_PIXEL_ARRAY_LEFT;
+	/*crop->left = OV5647_PIXEL_ARRAY_LEFT;
 	crop->top = OV5647_PIXEL_ARRAY_TOP;
 	crop->width = OV5647_PIXEL_ARRAY_WIDTH;
-	crop->height = OV5647_PIXEL_ARRAY_HEIGHT;
-
+	crop->height = OV5647_PIXEL_ARRAY_HEIGHT;*/
+	*crop = OV5647_DEFAULT_MODE->crop;
 	*format = OV5647_DEFAULT_FORMAT;
 
 	return 0;
