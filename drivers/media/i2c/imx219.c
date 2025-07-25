@@ -649,13 +649,6 @@ static int imx219_enum_mbus_code(struct v4l2_subdev *sd,
 	return 0;
 }
 
-static int imx219_get_reso_dist(const struct imx219_mode *mode,
-				struct v4l2_mbus_framefmt *framefmt)
-{
-	return abs(mode->width - framefmt->width) +
-	       abs(mode->height - framefmt->height);
-}
-
 static int imx219_set_fmt(struct v4l2_subdev *sd,
 			  struct v4l2_subdev_state *sd_state,
 			  struct v4l2_subdev_format *fmt)
