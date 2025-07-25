@@ -266,17 +266,6 @@ static const struct imx219_mode supported_modes[] = {
 		.vts_def = 0x06E6,
 		.reg_list = imx219_init_tab_1920_1080_30fps,
 	},
-	{
-		.width = 3280,
-		.height = 2464,
-		.max_fps = {
-			.numerator = 10000,
-			.denominator = 210000,
-		},
-		.hts_def = 0x0d78 - IMX219_EXP_LINES_MARGIN,
-		.vts_def = 0x09c4,
-		.reg_list = imx219_init_tab_3280_2464_21fps,
-	},
 };
 
 static struct imx219 *to_imx219(const struct i2c_client *client)
