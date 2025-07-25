@@ -656,7 +656,7 @@ static int imx219_get_reso_dist(const struct imx219_mode *mode,
 	       abs(mode->height - framefmt->height);
 }
 
-static const struct imx219_mode *imx219_find_best_fit(
+static const struct __maybe_unused imx219_mode *imx219_find_best_fit(
 					struct v4l2_subdev_format *fmt)
 {
 	struct v4l2_mbus_framefmt *framefmt = &fmt->format;
