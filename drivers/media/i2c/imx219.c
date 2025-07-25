@@ -689,7 +689,7 @@ static int imx219_set_fmt(struct v4l2_subdev *sd,
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
 		return 0;
 
-	mode = imx219_find_best_fit(fmt);
+	mode = &supported_modes[0];
 	fmt->format.code = MEDIA_BUS_FMT_SRGGB10_1X10;
 	fmt->format.width = mode->width;
 	fmt->format.height = mode->height;
