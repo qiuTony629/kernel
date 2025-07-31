@@ -590,12 +590,12 @@
 		pinctrl-0 = <&lcd_rst0_gpio>;
 		reset-gpios = <&gpio3 RK_PD2 GPIO_ACTIVE_LOW>;
 		backlight = <&backlight0>;
-		reset-delay-ms = <20>;
-		init-delay-ms = <10>;
+		reset-delay-ms = <200>;
 		enable-delay-ms = <100>;
 		prepare-delay-ms = <20>;
 		unprepare-delay-ms = <20>;
 		disable-delay-ms = <20>;
+		init-delay-ms = <120>;
 		width-mm = <45>;
 		height-mm = <75>;
 
@@ -603,11 +603,44 @@
 		dsi,format = <MIPI_DSI_FMT_RGB888>;
 		dsi,lanes  = <4>;
 		panel-init-sequence = [
-			15 00 02 51 00
-                        15 00 02 53 0C
-                        15 00 02 55 00
-                        05 00 01 11
-                        05 0A 01 29
+			// init code
+			// Set EXTC
+			39 00 04 B9 FF 83 94
+			// Set MIPI
+			39 00 03 BA 72 83
+			// Set Power HX5186 Mode
+			39 00 10 B1 6C 15 15 24 E4 11 F1 80 E4 97 23 80 C0 D2 58
+			// Set Display
+			39 00 0C B2 00 64 10 07 22 1C 08 08 1C 4D 00
+			// Set CYC
+			39 00 0D B4 00 FF 03 5A 03 5A 03 5A 01 6A 30 6A
+			// Set VDC
+			15 00 02 BC 07
+			// Set Power ption HX5186 Mode
+			39 00 04 BF 41 0E 01
+			// Set D3
+			39 00 1F D3 00 06 00 40 07 08 00 32 10 07 00 07 54 15 0F 05 04 02 12 10 05 07 33 33 0B 0B 37 10 07 07
+			// Set GIP,Forward
+			39 00 2D D5 04 05 06 07 00 01 02 03 20 21 22 23 18 18 18 18 18 18 18 18 19 19 18 18 18 18 1B 1B 1A 1A 18 18 18 18 18 18 18 18 18 18 18 18 18 18
+			// Set D6,Backward
+			39 00 2D D6 03 02 01 00 07 06 05 04 23 22 21 20 18 18 18 18 18 18 58 58 18 18 19 19 18 18 1B 1B 1A 1A 18 18 18 18 18 18 18 18 18 18 18 18 18 18
+			// Set Panel
+			15 00 02 CC 09
+			// Set VCOM
+			39 00 03 B6 51 51
+			// Set Gamma
+			39 00 2B E0 00 10 16 2D 33 3F 23 3E 07 0B 0D 17 0E 12 14 12 13 06 11 13 18 00 0F 16 2E 33 3F 23 3D 07 0B 0D 18 0F 12 14 12 14 07 11 12 17
+			// Set C0
+			39 00 03 C0 30 14
+			// Set TCON ption
+			39 00 05 C7 00 C0 40 C0
+			// Set SAP_L ption
+			15 00 02 DF 87
+			// Set SETOFFSET
+			15 00 02 D2 66 
+			// 
+			15 78 02 11 00
+			15 28 02 29 00
 		];
 
 		panel-exit-sequence = [
@@ -618,22 +651,26 @@
 		display-timings {
 			native-mode = <&dsi_timing0>;
 			dsi_timing0: timing0 {
-				clock-frequency = <142000000>;// (1920+4+3+1)*(1080+96+33+12)*60=134800000
-                    		hactive = <1080>;
-				hfront-porch = <96>;
+				clock-frequency = <56000000>;// (720+2+2+2)*(1280+2+2+2)*60=56018160
 
-				hback-porch = <33>;
-				hsync-len = <12>;
+				hactive = <720>;
+				hfront-porch = <8>;
+				hback-porch = <8>;
+				hsync-len = <16>;
 
-				vactive = <1920>;
-				vfront-porch = <4>;
-				vback-porch = <3>;
-				vsync-len = <1>;
+				vactive = <1280>;
+				vfront-porch = <2>;
+				vback-porch = <8>;
+				vsync-len = <10>;
 
 				hsync-active = <0>;
 				vsync-active = <0>;
 				de-active = <0>;
 				pixelclk-active = <0>;
+
+				swap-rb = <0>;
+				swap-rg = <0>;
+				swap-gb = <0>;
 			};
 		};
 
