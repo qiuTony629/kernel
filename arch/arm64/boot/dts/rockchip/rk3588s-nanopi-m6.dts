@@ -181,6 +181,13 @@
 		clock-output-names = "CLK_CAMERA_24MHZ";
 		#clock-cells = <0>;
 	};
+
+	ext_cam_clk_25m: external-camera-clock {
+		compatible = "fixed-clock" ;
+		clock-frequency = <25000000>;
+		clock-output-names = "CLK_CAMERA_24MHZ";
+		#clock-cells = <0>;
+	};
 };
 
 
@@ -422,7 +429,7 @@
 		status = "okay";
 		compatible = "ovti,ov5647";
 		reg = <0x36>;
-		clocks = <&clk_cam_25m>;
+		clocks = <&ext_cam_clk_25m>;
 		pwdn-gpios = <&gpio1 RK_PD5 GPIO_ACTIVE_LOW>;
 		clock-names = "ext_cam_clk";
 		rockchip,camera-module-index = <0>;
