@@ -2,8 +2,8 @@
 dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
 	nanopi-m6-dsi0-amoled.dtbo \
 	nanopi-m6-csi1-ov5647.dtbo \
-	nanopi-m6-dsi0-800_1280-lcd.dts \
-	nanopi-m6-dsi1-1080_1920-lcd.dts
+	nanopi-m6-dsi0-800_1280-lcd.dtbo \
+	nanopi-m6-dsi1-1080_1920-lcd.dtbo
 
 dtbotxt-$(CONFIG_ARCH_ROCKCHIP) += \
 	README.rockchip-overlays
