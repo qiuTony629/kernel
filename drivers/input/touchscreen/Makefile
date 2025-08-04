@@ -130,3 +130,4 @@ obj-$(CONFIG_TOUCHSCREEN_RASPITS_FT5426) += raspits_ft5426.o
 obj-$(CONFIG_TOUCHSCREEN_IQS5XX)	+= iqs5xx.o
 obj-$(CONFIG_TOUCHSCREEN_ZINITIX)	+= zinitix.o
 obj-$(CONFIG_TOUCHSCREEN_FT3881)	+= focaltech_touch_ft3881/
+obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX) += synaptics_dsx/

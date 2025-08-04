@@ -1440,4 +1440,25 @@ config TOUCHSCREEN_ZINITIX
 	  To compile this driver as a module, choose M here: the
 	  module will be called zinitix.
 
+config TOUCHSCREEN_SYNAPTICS_DSX
+	tristate "Synpatics touchscreens support"
+	depends on I2C
+	default n
+	help
+		This option enables support for Synaptics touchscreen devices.
+		Synaptics touchscreens are commonly used in laptops and other
+		portable devices, providing a range of multi-touch capabilities.
+
+		If you enable this option, the driver will allow communication
+		with Synaptics touchscreens via I2C, enabling touch input and
+		gestures.
+
+		To use this driver, ensure that your hardware is compatible
+		with Synaptics touchscreens and that the correct I2C interface
+		is available.
+
+		If you are unsure, say "N" to disable support for Synaptics touchscreens.
+
+source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+
 endif
