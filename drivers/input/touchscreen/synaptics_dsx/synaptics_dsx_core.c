@@ -600,9 +600,9 @@ static struct device_attribute attrs[] = {
     __ATTR(productinfo, 0444, synaptics_rmi4_f01_productinfo_show, synaptics_rmi4_store_error),  // 对应 S_IRUSR
     __ATTR(buildid, 0444, synaptics_rmi4_f01_buildid_show, synaptics_rmi4_store_error),     // 对应 S_IRUSR
     __ATTR(flashprog, 0444, synaptics_rmi4_f01_flashprog_show, synaptics_rmi4_store_error), // 对应 S_IRUSR
-    __ATTR(0dbutton, 0664, synaptics_rmi4_0dbutton_show, synaptics_rmi4_0dbutton_store),    // 对应 S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP
+    __ATTR(0dbutton, 0664, synaptics_rmi4_0dbutton_show, synaptics_rmi4_0dbutton_store),    // 对应 S_IRUSR | S_IWUSR
     __ATTR(suspend, 0644, synaptics_rmi4_show_error, synaptics_rmi4_suspend_store),         // 对应 S_IWUSR | S_IRUSR
-    __ATTR(wake_gesture, 0664, synaptics_rmi4_wake_gesture_show, synaptics_rmi4_wake_gesture_store), // 对应 S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP
+    __ATTR(wake_gesture, 0664, synaptics_rmi4_wake_gesture_show, synaptics_rmi4_wake_gesture_store), // 对应 S_IRUSR | S_IWUSR
 };
 
 static struct kobj_attribute virtual_key_map_attr = {
