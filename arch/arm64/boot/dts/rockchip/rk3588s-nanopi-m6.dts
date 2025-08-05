@@ -284,7 +284,7 @@
 		/omit-if-no-ref/
 		touch_dsi0_gpio: touch-dsi0-gpio {
 			rockchip,pins =
-				<3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_up>,
+				<3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>,
 				<3 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
