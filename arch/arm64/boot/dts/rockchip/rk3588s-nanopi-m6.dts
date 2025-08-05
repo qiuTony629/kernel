@@ -1042,6 +1042,8 @@
                 synaptics,reset-delay-ms = <200>;
                 synaptics,reset-on-state = <0>;
                 synaptics,reset-active-ms = <20>;
+                synaptics,swap-axes;
+                synaptics,max-y-for-2d = <1080>;
                 status = "okay";
         };
 };
