@@ -1509,8 +1509,16 @@ static irqreturn_t synaptics_rmi4_irq(int irq, void *data)
 	struct synaptics_rmi4_data *rmi4_data = data;
 	const struct synaptics_dsx_board_data *bdata =
 			rmi4_data->hw_if->board_data;
+	int gpio_value;
 
-	if (gpio_get_value(bdata->irq_gpio) != bdata->irq_on_state)
+	gpio_value = gpio_get_value(bdata->irq_gpio);
+	
+	/* Add debug information */
+	dev_dbg(rmi4_data->pdev->dev.parent,
+			"%s: IRQ triggered, gpio=%d, expected=%d\n",
+			__func__, gpio_value, bdata->irq_on_state);
+
+	if (gpio_value != bdata->irq_on_state)
 		goto exit;
 
 	synaptics_rmi4_sensor_report(rmi4_data, true);

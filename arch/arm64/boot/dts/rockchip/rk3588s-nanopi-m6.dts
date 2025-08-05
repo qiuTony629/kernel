@@ -291,7 +291,7 @@
 		/omit-if-no-ref/
 		touch_dsi1_gpio: touch-dsi1-gpio {
 			rockchip,pins =
-				<4 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
+				<4 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>,
 				<4 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
@@ -1042,8 +1042,7 @@
                 synaptics,reset-delay-ms = <200>;
                 synaptics,reset-on-state = <0>;
                 synaptics,reset-active-ms = <20>;
-                synaptics,swap-axes;
-                synaptics,max-y-for-2d = <1080>;
+                synaptics,max-y-for-2d = <1920>;
                 status = "okay";
         };
 };
