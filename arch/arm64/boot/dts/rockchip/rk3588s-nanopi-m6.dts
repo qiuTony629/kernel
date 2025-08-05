@@ -676,7 +676,7 @@
 		width-mm = <45>;
 		height-mm = <75>;
 
-		dsi,flags = <((1 << 0) | (1 << 1) | (1 << 11) | (1 << 10))>;
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST | MIPI_DSI_MODE_LPM | MIPI_DSI_CLOCK_NON_CONTINUOUS)>;
 		dsi,format = <MIPI_DSI_FMT_RGB888>;
 		dsi,lanes  = <4>;
 		panel-init-sequence = [
@@ -693,7 +693,7 @@
 		display-timings {
 			native-mode = <&dsi_timing0>;
 			dsi_timing0: timing0 {
-				clock-frequency = <142000000>;// (1920+4+3+1)*(1080+96+33+12)*60=134800000
+				clock-frequency = <141000000>;// (1920+4+3+1)*(1080+96+33+12)*60=134800000
                    		hactive = <1080>;
 				hfront-porch = <96>;
 
