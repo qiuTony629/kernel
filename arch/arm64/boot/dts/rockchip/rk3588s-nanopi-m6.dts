@@ -1035,7 +1035,7 @@
         synaptics@20 {
                 compatible = "synaptics,dsx-i2c";
                 reg = <0x20>;
-                synaptics,irq-gpio = <&gpio4 RK_PA0 IRQ_TYPE_EDGE_FALLING>; /* IRQF_ONESHOT | IRQF_TRIGGER_LOW */
+                synaptics,irq-gpio = <&gpio4 RK_PA0 IRQ_TYPE_EDGE_FALLING>;
                 synaptics,reset-gpio = <&gpio4 RK_PA2 GPIO_ACTIVE_HIGH>;
                 synaptics,irq-on-state = <0>;
                 synaptics,power-delay-ms = <200>;

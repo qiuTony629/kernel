@@ -71,6 +71,9 @@ static int parse_dt(struct device *dev, struct synaptics_dsx_board_data *bdata)
 			"synaptics,irq-gpio", 0,
 			(enum of_gpio_flags *)&bdata->irq_flags);
 
+	/* Ensure IRQF_ONESHOT is set for threaded IRQ */
+	bdata->irq_flags |= IRQF_ONESHOT;
+
 	retval = of_property_read_u32(np, "synaptics,irq-on-state",
 			&value);
 	if (retval < 0)
