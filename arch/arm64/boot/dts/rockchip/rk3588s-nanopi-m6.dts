@@ -689,8 +689,8 @@
 		];
 
 		display-timings {
-			native-mode = <&dsi_timing0>;
-			dsi_timing0: timing0 {
+			native-mode = <&dsi1_timing>;
+			dsi1_timing: timing1 {
 				clock-frequency = <141000000>;// (1920+4+3+1)*(1080+96+33+12)*60=134800000
                    		hactive = <1080>;
 				hfront-porch = <96>;
@@ -770,8 +770,8 @@
 		];
 
 		display-timings {
-			native-mode = <&dsi_timing0>;
-			dsi_timing0: timing0 {
+			native-mode = <&dsi0_timing>;
+			dsi0_timing: timing0 {
 				clock-frequency = <141000000>;// (1920+4+3+1)*(1080+96+33+12)*60=134800000
                 hactive = <1080>;
 				hfront-porch = <96>;
