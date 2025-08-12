@@ -463,6 +463,8 @@
 		clocks = <&cru CLK_MIPI_CAMARAOUT_M1>;
 		pwdn-gpios = <&gpio1 RK_PD5 GPIO_ACTIVE_HIGH>;
 		reset-gpios = <&gpio1 RK_PC6 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&mipim0_camera1_clk>;
 		clock-names = "xvclk";
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
