@@ -2686,7 +2686,7 @@ static int imx415_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 	struct imx415 *imx415 = to_imx415(sd);
 	struct v4l2_mbus_framefmt *try_fmt =
 				v4l2_subdev_get_try_format(sd, fh->state, 0);
-	const struct imx415_mode *def_mode = &imx415->supported_modes[0];
+	const struct imx415_mode *def_mode = &imx415->supported_modes[1];
 
 	mutex_lock(&imx415->mutex);
 	/* Initialize try_fmt */
