@@ -314,16 +314,6 @@
 			rockchip,pins = <4 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
-
-	vedio {
-		cam_rst_gpio: cam-rst-gpio {
-			rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-
-		pwdn_gpio: pwdn-gpio {
-			rockchip,pins = <1 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>;
-		};
-	};
 };
 
 // EEPROM is not mounted by default.
@@ -471,7 +461,8 @@
 		compatible = "sony,imx415";
 		reg = <0x1a>;
 		clocks = <&cru CLK_MIPI_CAMARAOUT_M1>;
-		pwdn-gpios = <&gpio1 RK_PD5 GPIO_ACTIVE_LOW>;
+		pwdn-gpios = <&gpio1 RK_PD5 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 RK_PC6 GPIO_ACTIVE_LOW>;
 		clock-names = "xvclk";
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
