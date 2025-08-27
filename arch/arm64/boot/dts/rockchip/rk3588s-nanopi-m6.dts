@@ -413,7 +413,7 @@
 };
 
 &i2c3 {
-
+	clock-frequency = <200000>;
 	status = "okay";
 	imx415: imx415@1a {
 		status = "okay";
