@@ -156,6 +156,14 @@
 	mem-supply = <&vdd_cpu_big1_mem_s0>;
 };
 
+&gpu {
+	mali-supply = <&vdd_gpu_s0>;
+	mem-supply = <&vdd_gpu_mem_s0>;
+	upthreshold = <60>;
+	downdifferential = <30>;
+	status = "disabled";
+};
+
 &gpu_mali {
 	status = "okay";
 	mali-supply = <&vdd_gpu_s0>;
@@ -730,10 +738,6 @@
 };
 
 &display_subsystem {
-	clocks = <&hdptxphy_hdmi_clk0>;
+	clocks = <&hdptxphy_hdmi0>;
 	clock-names = "hdmi0_phy_pll";
-};
-
-&hdptxphy_hdmi_clk0 {
-	status = "okay";
 };
