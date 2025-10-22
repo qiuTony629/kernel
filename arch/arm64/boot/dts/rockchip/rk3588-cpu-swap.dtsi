@@ -3,11 +3,6 @@
  * Copyright (c) 2022 Rockchip Electronics Co., Ltd.
  */
 
-/delete-node/ &cpu_l0;
-/delete-node/ &cpu_l1;
-/delete-node/ &cpu_l2;
-/delete-node/ &cpu_l3;
-
 / {
 	cpus {
 		cpu_l0: cpu@0000 {
