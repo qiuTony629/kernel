@@ -650,41 +650,12 @@
 	rockchip,init-delay-ms = <100>;
 	vpcie3v3-supply = <&vcc_3v3_pcie20>;
 	status = "okay";
-
-	pcie@0,0 {
-		reg = <0x00200000 0 0 0 0>;
-		#address-cells = <3>;
-		#size-cells = <2>;
-
-		r8125_u12: pcie@20,0 {
-			reg = <0x000000 0 0 0 0>;
-			local-mac-address = [ 00 00 00 00 00 00 ];
-		};
-	};
-};
-
-&pcie2x1l1 {
-	reset-gpios = <&gpio4 RK_PA2 GPIO_ACTIVE_HIGH>;
-	rockchip,init-delay-ms = <500>;
-	vpcie3v3-supply = <&vdd_mpcie_3v3>;
-	status = "okay";
 };
 
 &pcie2x1l2 {
 	reset-gpios = <&gpio4 RK_PA4 GPIO_ACTIVE_HIGH>;
 	vpcie3v3-supply = <&vcc_3v3_pcie20>;
 	status = "okay";
-
-	pcie@0,0 {
-		reg = <0x00400000 0 0 0 0>;
-		#address-cells = <3>;
-		#size-cells = <2>;
-
-		r8125_u10: pcie@40,0 {
-			reg = <0x000000 0 0 0 0>;
-			local-mac-address = [ 00 00 00 00 00 00 ];
-		};
-	};
 };
 
 &pcie30phy {
