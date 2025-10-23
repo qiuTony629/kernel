@@ -1888,7 +1888,7 @@ static int update_parent_pgds(struct kbase_device *kbdev, struct kbase_mmu_table
 
 		kbdev->mmu_mode->entry_set_pte(&pte, target_pgd);
 		parent_page_va[parent_vpfn] = kbdev->mgm_dev->ops.mgm_update_gpu_pte(
-			kbdev->mgm_dev, MGM_DEFAULT_PTE_GROUP, parent_index, pte);
+			kbdev->mgm_dev, MGM_DEFAULT_PTE_GROUP, PBHA_ID_DEFAULT, PTE_FLAGS_NONE, parent_index, pte);
 		kbdev->mmu_mode->set_num_valid_entries(parent_page_va, current_valid_entries + 1);
 		kunmap(parent_page);
 
@@ -2292,10 +2292,10 @@ u64 kbase_mmu_create_ate(struct kbase_device *const kbdev,
 	int const level, int const group_id)
 {
 	u64 entry;
-
+	unsigned int pte_flags = 0;
 	kbdev->mmu_mode->entry_set_ate(&entry, phy, flags, level);
-	return kbdev->mgm_dev->ops.mgm_update_gpu_pte(kbdev->mgm_dev,
-		group_id, level, entry);
+	if ((flags & KBASE_REG_GPU_CACHED) && !(flags & KBASE_REG_CPU_CACHED)){pte_flags |= BIT(MMA_VIOLATION);}
+	return kbdev->mgm_dev->ops.mgm_update_gpu_pte(kbdev->mgm_dev, (unsigned int)group_id, PBHA_ID_DEFAULT, pte_flags, level, entry);
 }
 
 int kbase_mmu_insert_pages_no_flush(struct kbase_device *kbdev, struct kbase_mmu_table *mmut,
@@ -3441,7 +3441,7 @@ int kbase_mmu_migrate_page(struct tagged_addr old_phys, struct tagged_addr new_p
 #endif
 		kbdev->mmu_mode->entry_set_pte(&managed_pte, as_phys_addr_t(new_phys));
 		*target = kbdev->mgm_dev->ops.mgm_update_gpu_pte(
-			kbdev->mgm_dev, MGM_DEFAULT_PTE_GROUP, level, managed_pte);
+			kbdev->mgm_dev, MGM_DEFAULT_PTE_GROUP, PBHA_ID_DEFAULT, PTE_FLAGS_NONE, level, managed_pte);
 	}
 
 	kbdev->mmu_mode->set_num_valid_entries(pgd_page, num_of_valid_entries);

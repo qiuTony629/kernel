@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 /*
- * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
- * Copyright (c) 2024 Radxa Computer (Shenzhen) Co., Ltd.
+ * Copyright (c) 2022 Rockchip Electronics Co., Ltd.
+ * Copyright (c) 2022 Radxa Limited
  *
  */
 
@@ -131,6 +131,18 @@
 			regulator-off-in-suspend;
 		};
 	};
+};
+
+&av1d {
+	status = "okay";
+};
+
+&av1d_mmu {
+	status = "okay";
+};
+
+&avsd {
+	status = "okay";
 };
 
 &cpu_l0 {
@@ -407,6 +419,18 @@
 		regulator-on-in-suspend;
 		regulator-suspend-microvolt = <850000>;
 	};
+};
+
+&vdpu {
+	status = "okay";
+};
+
+&vdpu_mmu {
+	status = "okay";
+};
+
+&vepu {
+	status = "okay";
 };
 
 &pinctrl {

@@ -5,6 +5,7 @@
 
 obj-y				+= rk628/
 obj-$(CONFIG_RK803)		+= rk803.o
+obj-y		+= rockpi_mcu.o
 obj-y				+= rockchip/
 obj-$(CONFIG_LT7911D_FB_NOTIFIER) += lt7911d-fb-notifier.o
 obj-$(CONFIG_IBM_ASM)		+= ibmasm/
@@ -66,5 +67,3 @@ obj-$(CONFIG_HI6421V600_IRQ)	+= hi6421v600-irq.o
 obj-$(CONFIG_OPEN_DICE)		+= open-dice.o
 obj-$(CONFIG_GP_PCI1XXXX)	+= mchp_pci1xxxx/
 obj-$(CONFIG_VCPU_STALL_DETECTOR)	+= vcpu_stall_detector.o
-obj-$(CONFIG_UID_SYS_STATS)	+= uid_sys_stats.o
-obj-$(CONFIG_ROCKPI_MCU)        += rockpi_mcu.o

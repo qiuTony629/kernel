@@ -2,8 +2,8 @@
 # Synaptics DSX touchscreen driver configuration
 #
 menuconfig TOUCHSCREEN_SYNAPTICS_DSX
-	tristate "Synaptics DSX touchscreen"
-	default M
+	bool "Synaptics DSX touchscreen"
+	default y
 	help
 	  Say Y here if you have a Synaptics DSX touchscreen connected
 	  to your system.
@@ -16,13 +16,13 @@ choice
 	default TOUCHSCREEN_SYNAPTICS_DSX_I2C
 	prompt "Synaptics DSX bus interface"
 config TOUCHSCREEN_SYNAPTICS_DSX_I2C
-	tristate "RMI over I2C"
+	bool "RMI over I2C"
 	depends on I2C
 config TOUCHSCREEN_SYNAPTICS_DSX_SPI
-	tristate "RMI over SPI"
+	bool "RMI over SPI"
 	depends on SPI_MASTER
 config TOUCHSCREEN_SYNAPTICS_DSX_RMI_HID_I2C
-	tristate "HID over I2C"
+	bool "HID over I2C"
 	depends on I2C
 endchoice
 

@@ -9,7 +9,7 @@
 		bootargs = "earlycon=uart8250,mmio32,0xff9f0000 console=ttyFIQ0 root=PARTUUID=614e0000-0000 rw rootwait";
 	};
 
-	fiq_debugger: fiq-debugger {
+	fiq-debugger {
 		compatible = "rockchip,fiq-debugger";
 		rockchip,serial-id = <0>;
 		rockchip,wake-irq = <0>;
@@ -34,12 +34,12 @@
 		#size-cells = <2>;
 		ranges;
 
-		drm_logo: drm-logo@00000000 {
+		drm_logo: drm-logo@0 {
 			compatible = "rockchip,drm-logo";
 			reg = <0x0 0x0 0x0 0x0>;
 		};
 
-		drm_cubic_lut: drm-cubic-lut@00000000 {
+		drm_cubic_lut: drm-cubic-lut@0 {
 			compatible = "rockchip,drm-cubic-lut";
 			reg = <0x0 0x0 0x0 0x0>;
 		};

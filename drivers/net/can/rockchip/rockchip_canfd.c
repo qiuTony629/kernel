@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Copyright (c) 2020 Rockchip Electronics Co. Ltd.
+ * Copyright (c) 2020 Rockchip Electronics Co., Ltd.
  * Rockchip CANFD driver
  */
 
@@ -527,8 +527,8 @@ static void rockchip_canfd_tx_err_delay_work(struct work_struct *work)
  * xx xx xx xx         ff         ll 00 11 22 33 44 55 66 77
  * [ can_id ] [flags] [len] [can data (up to 8 bytes]
  */
-static int rockchip_canfd_start_xmit(struct sk_buff *skb,
-				     struct net_device *ndev)
+static netdev_tx_t rockchip_canfd_start_xmit(struct sk_buff *skb,
+					     struct net_device *ndev)
 {
 	struct rockchip_canfd *rcan = netdev_priv(ndev);
 	struct canfd_frame *cf = (struct canfd_frame *)skb->data;
@@ -817,18 +817,10 @@ static irqreturn_t rockchip_canfd_interrupt(int irq, void *dev_id)
 	u32 dlc = 0;
 	u32 quota, work_done = 0;
 
-	unsigned int ign;
-
 	isr = rockchip_canfd_read(rcan, CAN_INT);
 	if (isr & TX_FINISH_INT) {
 		cancel_delayed_work(&rcan->tx_err_work);
 		dlc = rockchip_canfd_read(rcan, CAN_TXFIC);
-		/* transmission complete interrupt */
-		if (dlc & FDF_MASK)
-			stats->tx_bytes += can_fd_dlc2len(dlc & DLC_MASK);
-		else
-			stats->tx_bytes += (dlc & DLC_MASK);
-		stats->tx_packets++;
 		if (rcan->txtorx && rcan->mode <= ROCKCHIP_RK3568_CAN_MODE && dlc & FORMAT_MASK) {
 			rockchip_canfd_write(rcan, CAN_TX_CHECK_FIC, FORMAT_MASK);
 			quota = rockchip_canfd_get_rx_fifo_cnt(ndev);
@@ -845,7 +837,8 @@ static irqreturn_t rockchip_canfd_interrupt(int irq, void *dev_id)
 					     0, 5000000, false, rcan, CAN_CMD))
 			netdev_err(ndev, "Warning: wait tx req timeout!\n");
 		rockchip_canfd_write(rcan, CAN_CMD, 0);
-		ign = can_get_echo_skb(ndev, 0, NULL);
+		stats->tx_bytes += can_get_echo_skb(ndev, 0, NULL);
+		stats->tx_packets++;
 		netif_wake_queue(ndev);
 	}
 
@@ -1146,7 +1139,7 @@ static int rockchip_canfd_probe(struct platform_device *pdev)
 
 	if (rcan->mode == ROCKCHIP_RK3568_CAN_MODE_V2) {
 		rcan->txtorx = 0;
-		netif_napi_add_weight(ndev, &rcan->napi, rockchip_canfd_rx_poll, 6);
+		netif_napi_add(ndev, &rcan->napi, rockchip_canfd_rx_poll);
 	}
 
 	ndev->netdev_ops = &rockchip_canfd_netdev_ops;

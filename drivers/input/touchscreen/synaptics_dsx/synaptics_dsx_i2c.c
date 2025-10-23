@@ -71,9 +71,6 @@ static int parse_dt(struct device *dev, struct synaptics_dsx_board_data *bdata)
 			"synaptics,irq-gpio", 0,
 			(enum of_gpio_flags *)&bdata->irq_flags);
 
-	/* Ensure IRQF_ONESHOT is set for threaded IRQ */
-	bdata->irq_flags |= IRQF_ONESHOT;
-
 	retval = of_property_read_u32(np, "synaptics,irq-on-state",
 			&value);
 	if (retval < 0)
@@ -352,14 +349,9 @@ static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 	struct i2c_client *i2c = to_i2c_client(rmi4_data->pdev->dev.parent);
 	struct i2c_adapter *adap = i2c->adapter;
 	struct i2c_msg *msg;
-
-	msg = kzalloc((rd_msgs + 1) * sizeof(struct i2c_msg), GFP_KERNEL);
-	if (!msg) {
-		dev_err(rmi4_data->pdev->dev.parent,
-				"%s: Failed to allocate memory for i2c_msg\n",
-				__func__);
+	msg = kcalloc(rd_msgs + 1, sizeof(*msg), GFP_KERNEL);
+	if (!msg)
 		return -ENOMEM;
-	}
 
 	mutex_lock(&rmi4_data->rmi4_io_ctrl_mutex);
 
@@ -425,6 +417,7 @@ static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 			}
 		}
 
+		kfree(msg);
 		if (retry == SYN_I2C_RETRY_TIMES) {
 			dev_err(rmi4_data->pdev->dev.parent,
 					"%s: I2C read over retry limit\n",
@@ -441,7 +434,6 @@ static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 
 exit:
 	mutex_unlock(&rmi4_data->rmi4_io_ctrl_mutex);
-	kfree(msg);
 
 	return retval;
 }
@@ -601,11 +593,11 @@ static int synaptics_rmi4_i2c_probe(struct i2c_client *client,
 	return 0;
 }
 
-static int synaptics_rmi4_i2c_remove(struct i2c_client *client)
+static void synaptics_rmi4_i2c_remove(struct i2c_client *client)
 {
 	platform_device_unregister(synaptics_dsx_i2c_device);
 
-	return 0;
+	//return 0;
 }
 
 static const struct i2c_device_id synaptics_rmi4_id_table[] = {

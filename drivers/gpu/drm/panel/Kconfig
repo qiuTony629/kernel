@@ -91,13 +91,19 @@ config DRM_PANEL_SIMPLE
 	tristate "support for simple panels (other than eDP ones)"
 	depends on OF
 	depends on BACKLIGHT_CLASS_DEVICE
-	depends on PM
 	select VIDEOMODE_HELPERS
 	help
 	  DRM panel driver for dumb non-eDP panels that need at most a regulator
 	  and a GPIO to be powered up. Optionally a backlight can be attached so
 	  that it can be automatically turned off when the panel goes into a
 	  low power state.
+
+config DRM_PANEL_SIMPLE_OF_ONLY
+	bool "compatible is simple-panel or panel-dpi or simple-panel-dsi only"
+	depends on DRM_PANEL_SIMPLE
+	depends on ROCKCHIP_MINI_KERNEL
+	help
+	  Only support panels which all parameters from device tree.
 
 config DRM_PANEL_EDP
 	tristate "support for simple Embedded DisplayPort panels"
@@ -453,14 +459,12 @@ config DRM_PANEL_RASPBERRYPI_TOUCHSCREEN
 	  choose M here.
 
 config DRM_PANEL_RASPITS_TC358762
-	tristate "Raspberry Pi 7-inch touchscreen tc358762 panel"
-	depends on OF && I2C
-	depends on BACKLIGHT_CLASS_DEVICE
-	select VIDEOMODE_HELPERS
+	tristate "Raspits Pi 7-inch touchscreen panel"
+	depends on DRM_MIPI_DSI
 	help
-	  Say Y here if you want to enable support for Raspberry Pi
-	  touchscreen tc358762 panel.
-	  To compile this driver as a module, choose M here.
+	  Say Y here if you want to enable support for the Raspits
+	  Pi 7" Touchscreen.  To compile this driver as a module,
+	  choose M here.
 
 config DRM_PANEL_RAYDIUM_RM67191
 	tristate "Raydium RM67191 FHD 1080x1920 DSI video mode panel"
@@ -762,4 +766,15 @@ config DRM_PANEL_XINPENG_XPP055C272
 	  Say Y here if you want to enable support for the Xinpeng
 	  XPP055C272 controller for 720x1280 LCD panels with MIPI/RGB/SPI
 	  system interfaces.
+
+config DRM_PANEL_INNOLUX_AFJ101_BA2131
+	tristate "Innolux AFJ101 BA2131 panel"
+	depends on OF
+	depends on DRM_MIPI_DSI
+	depends on BACKLIGHT_CLASS_DEVICE
+	help
+	  Say Y here if you want to enable support for Innolux BA2131
+	  TFT-LCD modules. The panel has a 800x1280 resolution and uses
+	  24 bit RGB per pixel. It provides a MIPI DSI interface to
+	  the host and has a built-in LED backlight.
 endmenu

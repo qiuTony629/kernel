@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 /*
- * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
- * Copyright (c) 2024 Radxa Computer (Shenzhen) Co., Ltd.
+ * Copyright (c) 2022 Rockchip Electronics Co., Ltd.
+ * Copyright (c) 2022 Radxa Limited
  *
  */
 
@@ -51,8 +51,7 @@
 		compatible = "pwm-fan";
 		#cooling-cells = <2>;
 		cooling-levels = <0 64 128 192 255>;
-		pwms = <&pwm12 0 60000 0>;
-		fan-supply = <&vcc5v0_sys>;
+		pwms = <&pwm12 0 10000 0>;
 	};
 
 	bluetooth_en: bluetooth-en {
@@ -85,6 +84,7 @@
 		state_led {
 			gpios = <&gpio3 RK_PC6 GPIO_ACTIVE_LOW>;
 			linux,default-trigger = "heartbeat";
+			default-state = "on";
 		};
 	};
 };
@@ -229,7 +229,6 @@
 &hdmi0 {
 	status = "okay";
 	cec-enable = "true";
-	enable-gpios = <&gpio4 RK_PB0 GPIO_ACTIVE_HIGH>;
 };
 
 &hdmi0_in_vp0 {
@@ -293,11 +292,11 @@
 };
 
 &display_subsystem {
-	clocks = <&hdptxphy_hdmi_clk0>;
+	clocks = <&hdptxphy_hdmi0>;
 	clock-names = "hdmi0_phy_pll";
 };
 
-&hdptxphy_hdmi_clk0 {
+&hdptxphy_hdmi0 {
 	status = "okay";
 };
 

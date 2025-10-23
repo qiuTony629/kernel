@@ -3,7 +3,7 @@
  *
  * ALSA SoC Audio Layer - Rockchip I2S Controller driver
  *
- * Copyright (c) 2014 Rockchip Electronics Co. Ltd.
+ * Copyright (c) 2014 Rockchip Electronics Co., Ltd.
  * Author: Jianqun <jay.xu@rock-chips.com>
  * Copyright (c) 2015 Collabora Ltd.
  * Author: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
@@ -387,7 +387,7 @@ static int rk_spdif_probe(struct platform_device *pdev)
 
 	spdif->playback_dma_data.addr = res->start + SPDIF_SMPDR;
 	spdif->playback_dma_data.addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-	spdif->playback_dma_data.maxburst = 4;
+	spdif->playback_dma_data.maxburst = 8;
 
 	spdif->dev = &pdev->dev;
 	dev_set_drvdata(&pdev->dev, spdif);
@@ -399,17 +399,17 @@ static int rk_spdif_probe(struct platform_device *pdev)
 			goto err_pm_runtime;
 	}
 
+	ret = devm_snd_dmaengine_pcm_register(&pdev->dev, NULL, 0);
+	if (ret) {
+		dev_err(&pdev->dev, "Could not register PCM\n");
+		goto err_pm_suspend;
+	}
+
 	ret = devm_snd_soc_register_component(&pdev->dev,
 					      &rk_spdif_component,
 					      &rk_spdif_dai, 1);
 	if (ret) {
 		dev_err(&pdev->dev, "Could not register DAI\n");
-		goto err_pm_suspend;
-	}
-
-	ret = devm_snd_dmaengine_pcm_register(&pdev->dev, NULL, 0);
-	if (ret) {
-		dev_err(&pdev->dev, "Could not register PCM\n");
 		goto err_pm_suspend;
 	}
 

@@ -18,7 +18,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html.
  *
  */
-
+#define KBASE_UNPIN_USER_BUF_PAGE_ALREADY_DEFINED
 #ifndef _KBASE_UTILITY_H
 #define _KBASE_UTILITY_H
 
@@ -26,7 +26,7 @@
 #error "Don't include this file directly, use mali_kbase.h instead"
 #endif
 
-static inline void kbase_timer_setup(struct timer_list *timer,
+static inline void kbase_timer_setup_local(struct timer_list *timer,
 				     void (*callback)(struct timer_list *timer))
 {
 #if KERNEL_VERSION(4, 14, 0) > LINUX_VERSION_CODE

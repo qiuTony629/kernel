@@ -136,7 +136,7 @@
 	dp0_sound: dp0-sound {
 		status = "okay";
 		compatible = "rockchip,hdmi";
-		rockchip,card-name= "rockchip-hdmi0";
+		rockchip,card-name = "rockchip-hdmi0";
 		rockchip,mclk-fs = <512>;
 		rockchip,cpu = <&spdif_tx2>;
 		rockchip,codec = <&dp0 1>;
@@ -146,7 +146,7 @@
 	dp1_sound: dp1-sound {
 		status = "okay";
 		compatible = "rockchip,hdmi";
-		rockchip,card-name= "rockchip-hdmi2";
+		rockchip,card-name = "rockchip-hdmi2";
 		rockchip,mclk-fs = <512>;
 		rockchip,cpu = <&spdif_tx5>;
 		rockchip,codec = <&dp1 1>;
@@ -278,7 +278,7 @@
 		rockchip,format = "i2s";
 		rockchip,bitclock-master = <&hdmirx_ctrler>;
 		rockchip,frame-master = <&hdmirx_ctrler>;
-		rockchip,card-name = "rockchip,hdmiin";
+		rockchip,card-name = "rockchip-hdmiin";
 		rockchip,cpu = <&i2s7_8ch>;
 		rockchip,codec = <&hdmirx_ctrler 0>;
 		rockchip,jack-det;
@@ -305,6 +305,10 @@
 };
 
 &av1d_mmu {
+	status = "okay";
+};
+
+&avsd {
 	status = "okay";
 };
 
@@ -609,15 +613,15 @@
 };
 
 &display_subsystem {
-	clocks = <&hdptxphy_hdmi_clk0>, <&hdptxphy_hdmi_clk1>;
+	clocks = <&hdptxphy_hdmi0>, <&hdptxphy_hdmi1>;
 	clock-names = "hdmi0_phy_pll", "hdmi1_phy_pll";
 };
 
-&hdptxphy_hdmi_clk0 {
+&hdptxphy_hdmi0 {
 	status = "okay";
 };
 
-&hdptxphy_hdmi_clk1 {
+&hdptxphy_hdmi1 {
 	status = "okay";
 };
 
@@ -980,6 +984,8 @@
 };
 
 &pcie30phy {
+	/* separate clock lines from the clock generator to phy and devices */
+	rockchip,rx-common-refclk-mode = <0 0 0 0>;
 	rockchip,pcie30-phymode = <PHY_MODE_PCIE_NANBNB>;
 	status = "okay";
 };

@@ -12,6 +12,8 @@ menuconfig INPUT_TOUCHSCREEN
 
 if INPUT_TOUCHSCREEN
 
+source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+
 config TOUCHSCREEN_88PM860X
 	tristate "Marvell 88PM860x touchscreen"
 	depends on MFD_88PM860X
@@ -198,6 +200,8 @@ config TOUCHSCREEN_CHIPONE_ICN8505
 	  To compile this driver as a module, choose M here: the
 	  module will be called chipone_icn8505.
 
+source "drivers/input/touchscreen/chipone_tddi/Kconfig"
+
 config TOUCHSCREEN_CY8CTMA140
 	tristate "cy8ctma140 touchscreen"
 	depends on I2C
@@ -382,7 +386,13 @@ config TOUCHSCREEN_FTS
 	  Say Y here if you have Focaltech touch panel.
 	  If unsure, say N.
 
-source "drivers/input/touchscreen/focaltech_touch_ft3881/Kconfig"
+config TOUCHSCREEN_FT5726
+	tristate "Focaltech Touchscreen FT5726"
+	depends on I2C
+	default n
+	help
+	  Say Y here if you have Focaltech touch panel.
+	  If unsure, say N.
 
 config TOUCHSCREEN_FUJITSU
 	tristate "Fujitsu serial touchscreen"
@@ -438,6 +448,8 @@ config TOUCHSCREEN_GT9XX
 	  on Rockchip platform, and your board-specific initialization
 	  code includes that in its table of IIC devices.
 	  If unsure, say N.
+
+source "drivers/input/touchscreen/gtx8/Kconfig"
 
 config TOUCHSCREEN_HIDEEP
 	tristate "HiDeep Touch IC"
@@ -781,6 +793,8 @@ config TOUCHSCREEN_HTCPEN
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called htcpen.
+
+source "drivers/input/touchscreen/parade/Kconfig"
 
 config TOUCHSCREEN_PENMOUNT
 	tristate "Penmount serial touchscreen"
@@ -1440,6 +1454,6 @@ config TOUCHSCREEN_ZINITIX
 	  To compile this driver as a module, choose M here: the
 	  module will be called zinitix.
 
-source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+source "drivers/input/touchscreen/hxchipset/Kconfig"
 
 endif

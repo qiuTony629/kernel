@@ -130,7 +130,7 @@ int kbase_timeline_init(struct kbase_timeline **timeline,
 
 	/* Initialize autoflush timer. */
 	atomic_set(&result->autoflush_timer_active, 0);
-	kbase_timer_setup(&result->autoflush_timer,
+	kbase_timer_setup_local(&result->autoflush_timer,
 			  kbasep_timeline_autoflush_timer_callback);
 	result->timeline_flags = timeline_flags;
 

@@ -2585,7 +2585,7 @@ int kbase_csf_kcpu_queue_new(struct kbase_context *kctx,
 	KBASE_KTRACE_ADD_CSF_KCPU(kctx->kbdev, KCPU_QUEUE_CREATE, queue,
 		queue->fence_context, 0);
 #ifdef CONFIG_MALI_BIFROST_FENCE_DEBUG
-	kbase_timer_setup(&queue->fence_timeout, fence_timeout_callback);
+	kbase_timer_setup_local(&queue->fence_timeout, fence_timeout_callback);
 #endif
 out:
 	mutex_unlock(&kctx->csf.kcpu_queues.lock);

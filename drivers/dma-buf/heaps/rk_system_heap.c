@@ -448,12 +448,12 @@ static void system_heap_dma_buf_release(struct dma_buf *dmabuf)
 	for_each_sgtable_sg(table, sg, i) {
 		struct page *page = sg_page(sg);
 
-		for (j = 0; j < NUM_ORDERS; j++) {
-			if (compound_order(page) == orders[j])
-				break;
+			for (j = 0; j < NUM_ORDERS; j++) {
+				if (compound_order(page) == orders[j])
+					break;
+			}
+			dmabuf_page_pool_free(buffer->pools[j], page);
 		}
-		dmabuf_page_pool_free(buffer->pools[j], page);
-	}
 	sg_free_table(table);
 	kfree(buffer);
 }

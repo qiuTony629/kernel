@@ -81,7 +81,7 @@ static void kbase_context_kbase_kinstr_jm_term(struct kbase_context *kctx)
 
 static int kbase_context_kbase_timer_setup(struct kbase_context *kctx)
 {
-	kbase_timer_setup(&kctx->soft_job_timeout,
+	kbase_timer_setup_local(&kctx->soft_job_timeout,
 			  kbasep_soft_job_timeout_worker);
 
 	return 0;
@@ -145,7 +145,7 @@ static const struct kbase_context_init context_init[] = {
 	{ kbase_context_kbase_kinstr_jm_init,
 	  kbase_context_kbase_kinstr_jm_term,
 	  "JM instrumentation initialization failed" },
-	{ kbase_context_kbase_timer_setup, NULL,
+	{ kbase_context_kbase_timer_setup_local, NULL,
 	  "Timers initialization failed" },
 	{ kbase_event_init, kbase_event_cleanup,
 	  "Event initialization failed" },

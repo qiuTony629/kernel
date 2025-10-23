@@ -614,9 +614,14 @@ static int simple_get_dais_count(struct asoc_simple_priv *priv,
 static int simple_soc_probe(struct snd_soc_card *card)
 {
 	struct asoc_simple_priv *priv = snd_soc_card_get_drvdata(card);
+	char prop[128];
+	const char *hp_pin = NULL;
 	int ret;
 
-	ret = asoc_simple_init_hp(card, &priv->hp_jack, PREFIX);
+	snprintf(prop, sizeof(prop), "%shp-pin-name", PREFIX);
+	of_property_read_string(card->dev->of_node, prop, &hp_pin);
+
+	ret = asoc_simple_init_jack(card, &priv->hp_jack, 1, PREFIX, (char *)hp_pin);
 	if (ret < 0)
 		return ret;
 
@@ -678,10 +683,12 @@ static int asoc_simple_probe(struct platform_device *pdev)
 		struct snd_soc_dai_link *dai_link = priv->dai_link;
 		struct simple_dai_props *dai_props = priv->dai_props;
 
+		ret = -EINVAL;
+
 		cinfo = dev->platform_data;
 		if (!cinfo) {
 			dev_err(dev, "no info for asoc-simple-card\n");
-			return -EINVAL;
+			goto err;
 		}
 
 		if (!cinfo->name ||
@@ -690,7 +697,7 @@ static int asoc_simple_probe(struct platform_device *pdev)
 		    !cinfo->platform ||
 		    !cinfo->cpu_dai.name) {
 			dev_err(dev, "insufficient asoc_simple_card_info settings\n");
-			return -EINVAL;
+			goto err;
 		}
 
 		cpus			= dai_link->cpus;

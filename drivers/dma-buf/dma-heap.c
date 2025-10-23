@@ -98,8 +98,8 @@ struct dma_buf *dma_heap_buffer_alloc(struct dma_heap *heap, size_t len,
 EXPORT_SYMBOL_GPL(dma_heap_buffer_alloc);
 
 int dma_heap_bufferfd_alloc(struct dma_heap *heap, size_t len,
-			    unsigned int fd_flags,
-			    unsigned int heap_flags)
+				 unsigned int fd_flags,
+				 unsigned int heap_flags)
 {
 	struct dma_buf *dmabuf;
 	int fd;
@@ -146,8 +146,8 @@ static long dma_heap_ioctl_allocate(struct file *file, void *data)
 		return -EINVAL;
 
 	fd = dma_heap_bufferfd_alloc(heap, heap_allocation->len,
-				     heap_allocation->fd_flags,
-				     heap_allocation->heap_flags);
+				   heap_allocation->fd_flags,
+				   heap_allocation->heap_flags);
 	if (fd < 0)
 		return fd;
 
@@ -358,10 +358,10 @@ struct dma_heap *dma_heap_add(const struct dma_heap_export_info *exp_info)
 	}
 
 	heap->heap_dev = device_create(dma_heap_class,
-				       NULL,
-				       heap->heap_devt,
-				       NULL,
-				       heap->name);
+				NULL,
+				heap->heap_devt,
+				NULL,
+				heap->name);
 	if (IS_ERR(heap->heap_dev)) {
 		pr_err("dma_heap: Unable to create device\n");
 		err_ret = ERR_CAST(heap->heap_dev);

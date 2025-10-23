@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Copyright (C) Rockchip Electronics Co.Ltd
+ * Copyright (C) Rockchip Electronics Co., Ltd.
  * Author: Felix Zeng <felix.zeng@rock-chips.com>
  */
 
@@ -147,6 +147,9 @@ int rknpu_soft_reset(struct rknpu_device *rknpu_dev)
 	}
 
 	rknpu_dev->soft_reseting = false;
+
+	if (rknpu_dev->config->state_init != NULL)
+		rknpu_dev->config->state_init(rknpu_dev);
 
 	mutex_unlock(&rknpu_dev->reset_lock);
 #endif

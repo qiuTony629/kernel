@@ -1,0 +1,3 @@
+0x1d269f60	synaptics_rmi4_bus_init	drivers/input/touchscreen/synaptics_dsx/synaptics_dsx_i2c	EXPORT_SYMBOL	
+0x1dbf5e30	synaptics_rmi4_bus_exit	drivers/input/touchscreen/synaptics_dsx/synaptics_dsx_i2c	EXPORT_SYMBOL	
+0x717ebf96	synaptics_rmi4_new_function	drivers/input/touchscreen/synaptics_dsx/synaptics_dsx_core	EXPORT_SYMBOL	

@@ -355,7 +355,7 @@ void kbase_csf_tl_reader_init(struct kbase_csf_tl_reader *self,
 {
 	self->timer_interval = KBASE_CSF_TL_READ_INTERVAL_DEFAULT;
 
-	kbase_timer_setup(&self->read_timer,
+	kbase_timer_setup_local(&self->read_timer,
 		kbasep_csf_tl_reader_read_callback);
 
 	self->stream = stream;

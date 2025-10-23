@@ -596,19 +596,33 @@ static struct synaptics_rmi4_exp_fn_data exp_data;
 static struct synaptics_dsx_button_map *vir_button_map;
 
 static struct device_attribute attrs[] = {
-    __ATTR(reset, 0644, synaptics_rmi4_show_error, synaptics_rmi4_f01_reset_store),         // 对应 S_IWUSR | S_IRUSR
-    __ATTR(productinfo, 0444, synaptics_rmi4_f01_productinfo_show, synaptics_rmi4_store_error),  // 对应 S_IRUSR
-    __ATTR(buildid, 0444, synaptics_rmi4_f01_buildid_show, synaptics_rmi4_store_error),     // 对应 S_IRUSR
-    __ATTR(flashprog, 0444, synaptics_rmi4_f01_flashprog_show, synaptics_rmi4_store_error), // 对应 S_IRUSR
-    __ATTR(0dbutton, 0664, synaptics_rmi4_0dbutton_show, synaptics_rmi4_0dbutton_store),    // 对应 S_IRUSR | S_IWUSR
-    __ATTR(suspend, 0644, synaptics_rmi4_show_error, synaptics_rmi4_suspend_store),         // 对应 S_IWUSR | S_IRUSR
-    __ATTR(wake_gesture, 0664, synaptics_rmi4_wake_gesture_show, synaptics_rmi4_wake_gesture_store), // 对应 S_IRUSR | S_IWUSR
+	__ATTR(reset, 0200,
+			synaptics_rmi4_show_error,
+			synaptics_rmi4_f01_reset_store),
+	__ATTR(productinfo, 0444,
+			synaptics_rmi4_f01_productinfo_show,
+			synaptics_rmi4_store_error),
+	__ATTR(buildid, 0444,
+			synaptics_rmi4_f01_buildid_show,
+			synaptics_rmi4_store_error),
+	__ATTR(flashprog, 0444,
+			synaptics_rmi4_f01_flashprog_show,
+			synaptics_rmi4_store_error),
+	__ATTR(0dbutton, (0644),
+			synaptics_rmi4_0dbutton_show,
+			synaptics_rmi4_0dbutton_store),
+	__ATTR(suspend, 0200,
+			synaptics_rmi4_show_error,
+			synaptics_rmi4_suspend_store),
+	__ATTR(wake_gesture, (0644),
+			synaptics_rmi4_wake_gesture_show,
+			synaptics_rmi4_wake_gesture_store),
 };
 
 static struct kobj_attribute virtual_key_map_attr = {
 	.attr = {
 		.name = VIRTUAL_KEY_MAP_FILE_NAME,
-		.mode = S_IRUGO,
+		.mode = 0444,
 	},
 	.show = synaptics_rmi4_virtual_key_map_show,
 };
@@ -1509,16 +1523,8 @@ static irqreturn_t synaptics_rmi4_irq(int irq, void *data)
 	struct synaptics_rmi4_data *rmi4_data = data;
 	const struct synaptics_dsx_board_data *bdata =
 			rmi4_data->hw_if->board_data;
-	int gpio_value;
 
-	gpio_value = gpio_get_value(bdata->irq_gpio);
-	
-	/* Add debug information */
-	dev_dbg(rmi4_data->pdev->dev.parent,
-			"%s: IRQ triggered, gpio=%d, expected=%d\n",
-			__func__, gpio_value, bdata->irq_on_state);
-
-	if (gpio_value != bdata->irq_on_state)
+	if (gpio_get_value(bdata->irq_gpio) != bdata->irq_on_state)
 		goto exit;
 
 	synaptics_rmi4_sensor_report(rmi4_data, true);
@@ -1602,7 +1608,8 @@ static int synaptics_rmi4_irq_enable(struct synaptics_rmi4_data *rmi4_data,
 		}
 
 		retval = request_threaded_irq(rmi4_data->irq, NULL,
-				synaptics_rmi4_irq, bdata->irq_flags,
+				synaptics_rmi4_irq,
+				bdata->irq_flags | IRQF_ONESHOT,
 				PLATFORM_DRIVER_NAME, rmi4_data);
 		if (retval < 0) {
 			dev_err(rmi4_data->pdev->dev.parent,

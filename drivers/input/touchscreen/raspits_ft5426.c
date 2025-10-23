@@ -188,7 +188,7 @@ static void raspits_ft5426_work(struct work_struct *work)
 	struct raspits_ft5426_data *ts_data
 			= container_of(work, struct raspits_ft5426_data, ft5426_work);
 	struct ts_event *event = &ts_data->event;
-	int ret = 0, count = 40, td_status;
+	int ret = 0, count = 8, td_status;
 
 	while(count > 0) {
 		ret = fts_check_fw_ver(ts_data->client);
@@ -290,8 +290,7 @@ static void raspits_ft5426_remove(struct i2c_client *client)
 
 static const struct i2c_device_id raspits_ft5426_id[] = {
 	{ "raspits_ft5426", 0 },
-	{ "rockpi_ft5406", 0},
-	{}
+	{ },
 };
 
 static struct i2c_driver raspits_ft5426_driver = {
@@ -306,3 +305,4 @@ module_i2c_driver(raspits_ft5426_driver);
 
 MODULE_DESCRIPTION("Raspberry Pi 7 inch Touchscreen FT5426 Touch driver");
 MODULE_LICENSE("GPL v2");
+

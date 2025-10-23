@@ -13,6 +13,12 @@ config RK803
 	help
 	  Driver for RK803 which is used for driving porjector and IR flood LED.
 
+config CONFIG_ROCKPI_MCU
+	tristate "ROCKPI_MCU"
+	depends on I2C
+	help
+	  Driver for ROCKPI_MCU which is used for 7 Touchscreen.
+
 source "drivers/misc/rockchip/Kconfig"
 
 config LT7911D_FB_NOTIFIER
@@ -491,6 +497,7 @@ config HISI_HIKEY_USB
 config OPEN_DICE
 	tristate "Open Profile for DICE driver"
 	depends on OF_RESERVED_MEM
+	depends on HAS_IOMEM
 	help
 	  This driver exposes a DICE reserved memory region to userspace via
 	  a character device. The memory region contains Compound Device
@@ -512,13 +519,6 @@ config VCPU_STALL_DETECTOR
 	  will be called vcpu_stall_detector.
 
 	  If you do not intend to run this kernel as a guest, say N.
-
-config ROCKPI_MCU
-	tristate "rockpi mcu"
-	default n
-	depends on I2C
-	help
-	  Control the power of touch screen for rockpi board.
 
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"

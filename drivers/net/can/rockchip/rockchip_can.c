@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Copyright (c) 2020 Rockchip Electronics Co. Ltd.
+ * Copyright (c) 2020 Rockchip Electronics Co., Ltd.
  * Rockchip CAN driver
  */
 
@@ -271,7 +271,8 @@ static int rockchip_can_set_mode(struct net_device *ndev, enum can_mode mode)
  * xx xx xx xx         ff         ll 00 11 22 33 44 55 66 77
  * [ can_id ] [flags] [len] [can data (up to 8 bytes]
  */
-static int rockchip_can_start_xmit(struct sk_buff *skb, struct net_device *ndev)
+static netdev_tx_t rockchip_can_start_xmit(struct sk_buff *skb,
+					   struct net_device *ndev)
 {
 	struct rockchip_can *rcan = netdev_priv(ndev);
 	struct can_frame *cf = (struct can_frame *)skb->data;
@@ -501,16 +502,13 @@ static irqreturn_t rockchip_can_interrupt(int irq, void *dev_id)
 	u8 err_int = ERR_WARN_INT | RX_BUF_OV | PASSIVE_ERR |
 		     TX_LOSTARB | BUS_ERR_INT;
 	u8 isr;
-	unsigned int ign;
 
 	isr = readl(rcan->base + CAN_INT);
 	if (isr & TX_FINISH) {
 		/* transmission complete interrupt */
-		stats->tx_bytes += readl(rcan->base + CAN_TX_FRM_INFO) &
-				   CAN_DLC_MASK;
-		stats->tx_packets++;
 		rockchip_can_write_cmdreg(rcan, 0);
-		ign = can_get_echo_skb(ndev, 0, NULL);
+		stats->tx_bytes += can_get_echo_skb(ndev, 0, NULL);
+		stats->tx_packets++;
 		netif_wake_queue(ndev);
 	}
 
