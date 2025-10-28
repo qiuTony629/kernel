@@ -1339,11 +1339,9 @@ static int rockchip_spi_suspend(struct device *dev)
 	if (ret < 0)
 		return ret;
 
-	ret = pm_runtime_force_suspend(dev);
-	if (ret < 0) {
-		spi_controller_resume(ctlr);
-		return ret;
-	}
+	/* Avoid redundant clock disable */
+	if (!pm_runtime_status_suspended(dev))
+		rockchip_spi_runtime_suspend(dev);
 
 	pinctrl_pm_select_sleep_state(dev);
 
@@ -1357,11 +1355,17 @@ static int rockchip_spi_resume(struct device *dev)
 
 	pinctrl_pm_select_default_state(dev);
 
-	ret = pm_runtime_force_resume(dev);
-	if (ret < 0)
-		return ret;
+	if (!pm_runtime_status_suspended(dev)) {
+		ret = rockchip_spi_runtime_resume(dev);
+		if (ret < 0)
+			return ret;
+	}
 
-	return spi_controller_resume(ctlr);
+	ret = spi_controller_resume(ctlr);
+	if (ret < 0)
+		rockchip_spi_runtime_suspend(dev);
+
+	return 0;
 }
 #endif /* CONFIG_PM_SLEEP */
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0 OR MIT
 /*
  * Rockchip NAND Flash controller driver.
- * Copyright (C) 2020 Rockchip Electronics Co., Ltd.
+ * Copyright (C) 2020 Rockchip Inc.
  * Author: Yifeng Zhao <yifeng.zhao@rock-chips.com>
  */
 

@@ -164,27 +164,10 @@ void drm_gem_private_object_init(struct drm_device *dev,
 	if (!obj->resv)
 		obj->resv = &obj->_resv;
 
-	if (drm_core_check_feature(dev, DRIVER_GEM_GPUVA))
-		drm_gem_gpuva_init(obj);
-
 	drm_vma_node_reset(&obj->vma_node);
 	INIT_LIST_HEAD(&obj->lru_node);
 }
 EXPORT_SYMBOL(drm_gem_private_object_init);
-
-/**
- * drm_gem_private_object_fini - Finalize a failed drm_gem_object
- * @obj: drm_gem_object
- *
- * Uninitialize an already allocated GEM object when it initialized failed
- */
-void drm_gem_private_object_fini(struct drm_gem_object *obj)
-{
-	WARN_ON(obj->dma_buf);
-
-	dma_resv_fini(&obj->_resv);
-}
-EXPORT_SYMBOL(drm_gem_private_object_fini);
 
 /**
  * drm_gem_object_handle_free - release resources bound to userspace handles
@@ -322,7 +305,7 @@ int drm_gem_dumb_map_offset(struct drm_file *file, struct drm_device *dev,
 		return -ENOENT;
 
 	/* Don't allow imported objects to be mapped */
-	if (drm_gem_is_imported(obj)) {
+	if (obj->import_attach) {
 		ret = -EINVAL;
 		goto out;
 	}
@@ -947,11 +930,12 @@ drm_gem_release(struct drm_device *dev, struct drm_file *file_private)
 void
 drm_gem_object_release(struct drm_gem_object *obj)
 {
+	WARN_ON(obj->dma_buf);
+
 	if (obj->filp)
 		fput(obj->filp);
 
-	drm_gem_private_object_fini(obj);
-
+	dma_resv_fini(&obj->_resv);
 	drm_gem_free_mmap_offset(obj);
 	drm_gem_lru_remove(obj);
 }
@@ -1150,7 +1134,7 @@ void drm_gem_print_info(struct drm_printer *p, unsigned int indent,
 			  drm_vma_node_start(&obj->vma_node));
 	drm_printf_indent(p, indent, "size=%zu\n", obj->size);
 	drm_printf_indent(p, indent, "imported=%s\n",
-			  str_yes_no(drm_gem_is_imported(obj)));
+			  str_yes_no(obj->import_attach));
 
 	if (obj->funcs->print_info)
 		obj->funcs->print_info(p, indent, obj);
@@ -1170,11 +1154,9 @@ void drm_gem_unpin(struct drm_gem_object *obj)
 		obj->funcs->unpin(obj);
 }
 
-int drm_gem_vmap_locked(struct drm_gem_object *obj, struct iosys_map *map)
+int drm_gem_vmap(struct drm_gem_object *obj, struct iosys_map *map)
 {
 	int ret;
-
-	dma_resv_assert_held(obj->resv);
 
 	if (!obj->funcs->vmap)
 		return -EOPNOTSUPP;
@@ -1187,12 +1169,10 @@ int drm_gem_vmap_locked(struct drm_gem_object *obj, struct iosys_map *map)
 
 	return 0;
 }
-EXPORT_SYMBOL(drm_gem_vmap_locked);
+EXPORT_SYMBOL(drm_gem_vmap);
 
-void drm_gem_vunmap_locked(struct drm_gem_object *obj, struct iosys_map *map)
+void drm_gem_vunmap(struct drm_gem_object *obj, struct iosys_map *map)
 {
-	dma_resv_assert_held(obj->resv);
-
 	if (iosys_map_is_null(map))
 		return;
 
@@ -1201,26 +1181,6 @@ void drm_gem_vunmap_locked(struct drm_gem_object *obj, struct iosys_map *map)
 
 	/* Always set the mapping to NULL. Callers may rely on this. */
 	iosys_map_clear(map);
-}
-EXPORT_SYMBOL(drm_gem_vunmap_locked);
-
-int drm_gem_vmap(struct drm_gem_object *obj, struct iosys_map *map)
-{
-	int ret;
-
-	dma_resv_lock(obj->resv, NULL);
-	ret = drm_gem_vmap_locked(obj, map);
-	dma_resv_unlock(obj->resv);
-
-	return ret;
-}
-EXPORT_SYMBOL(drm_gem_vmap);
-
-void drm_gem_vunmap(struct drm_gem_object *obj, struct iosys_map *map)
-{
-	dma_resv_lock(obj->resv, NULL);
-	drm_gem_vunmap_locked(obj, map);
-	dma_resv_unlock(obj->resv);
 }
 EXPORT_SYMBOL(drm_gem_vunmap);
 

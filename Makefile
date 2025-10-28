@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 VERSION = 6
 PATCHLEVEL = 1
-SUBLEVEL = 115
+SUBLEVEL = 99
 EXTRAVERSION =
 NAME = Curry Ramen
 
@@ -865,7 +865,7 @@ stackp-flags-$(CONFIG_STACKPROTECTOR_STRONG)      := -fstack-protector-strong
 
 KBUILD_CFLAGS += $(stackp-flags-y)
 
-#KBUILD_CFLAGS-$(CONFIG_WERROR) += -Werror
+KBUILD_CFLAGS-$(CONFIG_WERROR) += -Werror
 KBUILD_CFLAGS-$(CONFIG_CC_NO_ARRAY_BOUNDS) += -Wno-array-bounds
 
 KBUILD_RUSTFLAGS-$(CONFIG_WERROR) += -Dwarnings
@@ -1594,7 +1594,7 @@ CLEAN_FILES += include/ksym vmlinux.symvers modules-only.symvers \
 MRPROPER_FILES += include/config include/generated          \
 		  arch/$(SRCARCH)/include/generated .objdiff \
 		  debian snap tar-install \
-		  .config .config.old .version \
+		  .config .config.old \
 		  Module.symvers \
 		  certs/signing_key.pem \
 		  certs/x509.genkey \

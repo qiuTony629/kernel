@@ -2187,28 +2187,6 @@ int kbase_map_external_resource(struct kbase_context *kctx, struct kbase_va_regi
 				struct mm_struct *locked_mm);
 
 /**
- * kbase_unmap_external_resource - Unmap an external resource from the GPU.
- * @kctx:  kbase context.
- * @reg:   VA region corresponding to external resource
- *
- * On successful unmapping, the VA region and the gpu_alloc refcounts will
- * be decreased. If the refcount reaches zero, both @reg and the corresponding
- * allocation may be freed, so using them after returning from this function
- * requires the caller to explicitly check their state.
- */
-void kbase_unmap_external_resource(struct kbase_context *kctx, struct kbase_va_region *reg);
-
-/**
- * kbase_unpin_user_buf_page - Unpin a page of a user buffer.
- * @page: page to unpin
- *
- * The caller must have ensured that there are no CPU mappings for @page (as
- * might be created from the struct kbase_mem_phy_alloc that tracks @page), and
- * that userspace will not be able to recreate the CPU mappings again.
- */
-void kbase_unpin_user_buf_page(struct page *page);
-
-/**
  * kbase_jd_user_buf_pin_pages - Pin the pages of a user buffer.
  * @kctx: kbase context.
  * @reg:  The region associated with the imported user buffer.

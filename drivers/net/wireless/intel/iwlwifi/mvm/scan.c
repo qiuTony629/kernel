@@ -824,8 +824,8 @@ static inline bool iwl_mvm_scan_fits(struct iwl_mvm *mvm, int n_ssids,
 	return ((n_ssids <= PROBE_OPTION_MAX) &&
 		(n_channels <= mvm->fw->ucode_capa.n_scan_channels) &
 		(ies->common_ie_len +
-		 ies->len[NL80211_BAND_2GHZ] + ies->len[NL80211_BAND_5GHZ] +
-		 ies->len[NL80211_BAND_6GHZ] <=
+		 ies->len[NL80211_BAND_2GHZ] +
+		 ies->len[NL80211_BAND_5GHZ] <=
 		 iwl_mvm_max_scan_ie_fw_cmd_room(mvm)));
 }
 
@@ -1707,10 +1707,7 @@ iwl_mvm_umac_scan_fill_6g_chan_list(struct iwl_mvm *mvm,
 				break;
 		}
 
-		if (k == idex_b && idex_b < SCAN_BSSID_MAX_SIZE &&
-		    !WARN_ONCE(!is_valid_ether_addr(scan_6ghz_params[j].bssid),
-			       "scan: invalid BSSID at index %u, index_b=%u\n",
-			       j, idex_b)) {
+		if (k == idex_b && idex_b < SCAN_BSSID_MAX_SIZE) {
 			memcpy(&pp->bssid_array[idex_b++],
 			       scan_6ghz_params[j].bssid, ETH_ALEN);
 		}
@@ -2935,16 +2932,18 @@ int iwl_mvm_sched_scan_start(struct iwl_mvm *mvm,
 		params.n_channels = j;
 	}
 
-	if (!iwl_mvm_scan_fits(mvm, req->n_ssids, ies, params.n_channels)) {
-		ret = -ENOBUFS;
-		goto out;
+	if (non_psc_included &&
+	    !iwl_mvm_scan_fits(mvm, req->n_ssids, ies, params.n_channels)) {
+		kfree(params.channels);
+		return -ENOBUFS;
 	}
 
 	uid = iwl_mvm_build_scan_cmd(mvm, vif, &hcmd, &params, type);
-	if (uid < 0) {
-		ret = uid;
-		goto out;
-	}
+
+	if (non_psc_included)
+		kfree(params.channels);
+	if (uid < 0)
+		return uid;
 
 	ret = iwl_mvm_send_cmd(mvm, &hcmd);
 	if (!ret) {
@@ -2961,9 +2960,6 @@ int iwl_mvm_sched_scan_start(struct iwl_mvm *mvm,
 		mvm->sched_scan_pass_all = SCHED_SCAN_PASS_ALL_DISABLED;
 	}
 
-out:
-	if (non_psc_included)
-		kfree(params.channels);
 	return ret;
 }
 
@@ -3037,22 +3033,12 @@ void iwl_mvm_rx_umac_scan_iter_complete_notif(struct iwl_mvm *mvm,
 		       mvm->scan_start);
 }
 
-static int iwl_mvm_umac_scan_abort(struct iwl_mvm *mvm, int type, bool *wait)
+static int iwl_mvm_umac_scan_abort(struct iwl_mvm *mvm, int type)
 {
-	struct iwl_umac_scan_abort abort_cmd = {};
-	struct iwl_host_cmd cmd = {
-		.id = WIDE_ID(IWL_ALWAYS_LONG_GROUP, SCAN_ABORT_UMAC),
-		.len = { sizeof(abort_cmd), },
-		.data = { &abort_cmd, },
-		.flags = CMD_SEND_IN_RFKILL,
-	};
-
+	struct iwl_umac_scan_abort cmd = {};
 	int uid, ret;
-	u32 status = IWL_UMAC_SCAN_ABORT_STATUS_NOT_FOUND;
 
 	lockdep_assert_held(&mvm->mutex);
-
-	*wait = true;
 
 	/* We should always get a valid index here, because we already
 	 * checked that this type of scan was running in the generic
@@ -3062,27 +3048,15 @@ static int iwl_mvm_umac_scan_abort(struct iwl_mvm *mvm, int type, bool *wait)
 	if (WARN_ON_ONCE(uid < 0))
 		return uid;
 
-	abort_cmd.uid = cpu_to_le32(uid);
+	cmd.uid = cpu_to_le32(uid);
 
 	IWL_DEBUG_SCAN(mvm, "Sending scan abort, uid %u\n", uid);
 
-	ret = iwl_mvm_send_cmd_status(mvm, &cmd, &status);
-
-	IWL_DEBUG_SCAN(mvm, "Scan abort: ret=%d, status=%u\n", ret, status);
+	ret = iwl_mvm_send_cmd_pdu(mvm,
+				   WIDE_ID(IWL_ALWAYS_LONG_GROUP, SCAN_ABORT_UMAC),
+				   0, sizeof(cmd), &cmd);
 	if (!ret)
 		mvm->scan_uid_status[uid] = type << IWL_MVM_SCAN_STOPPING_SHIFT;
-
-	/* Handle the case that the FW is no longer familiar with the scan that
-	 * is to be stopped. In such a case, it is expected that the scan
-	 * complete notification was already received but not yet processed.
-	 * In such a case, there is no need to wait for a scan complete
-	 * notification and the flow should continue similar to the case that
-	 * the scan was really aborted.
-	 */
-	if (status == IWL_UMAC_SCAN_ABORT_STATUS_NOT_FOUND) {
-		mvm->scan_uid_status[uid] = type << IWL_MVM_SCAN_STOPPING_SHIFT;
-		*wait = false;
-	}
 
 	return ret;
 }
@@ -3093,7 +3067,6 @@ static int iwl_mvm_scan_stop_wait(struct iwl_mvm *mvm, int type)
 	static const u16 scan_done_notif[] = { SCAN_COMPLETE_UMAC,
 					      SCAN_OFFLOAD_COMPLETE, };
 	int ret;
-	bool wait = true;
 
 	lockdep_assert_held(&mvm->mutex);
 
@@ -3105,7 +3078,7 @@ static int iwl_mvm_scan_stop_wait(struct iwl_mvm *mvm, int type)
 	IWL_DEBUG_SCAN(mvm, "Preparing to stop scan, type %x\n", type);
 
 	if (fw_has_capa(&mvm->fw->ucode_capa, IWL_UCODE_TLV_CAPA_UMAC_SCAN))
-		ret = iwl_mvm_umac_scan_abort(mvm, type, &wait);
+		ret = iwl_mvm_umac_scan_abort(mvm, type);
 	else
 		ret = iwl_mvm_lmac_scan_abort(mvm);
 
@@ -3113,10 +3086,6 @@ static int iwl_mvm_scan_stop_wait(struct iwl_mvm *mvm, int type)
 		IWL_DEBUG_SCAN(mvm, "couldn't stop scan type %d\n", type);
 		iwl_remove_notification(&mvm->notif_wait, &wait_scan_done);
 		return ret;
-	} else if (!wait) {
-		IWL_DEBUG_SCAN(mvm, "no need to wait for scan type %d\n", type);
-		iwl_remove_notification(&mvm->notif_wait, &wait_scan_done);
-		return 0;
 	}
 
 	return iwl_wait_notification(&mvm->notif_wait, &wait_scan_done,
@@ -3253,7 +3222,7 @@ int iwl_mvm_scan_stop(struct iwl_mvm *mvm, int type, bool notify)
 	if (!(mvm->scan_status & type))
 		return 0;
 
-	if (!test_bit(STATUS_DEVICE_ENABLED, &mvm->trans->status)) {
+	if (iwl_mvm_is_radio_killed(mvm)) {
 		ret = 0;
 		goto out;
 	}

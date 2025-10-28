@@ -25,7 +25,6 @@
 #include <linux/input/mt.h>
 #include <linux/wakelock.h>
 
-#include "gsl_point_id.h"
 #include "tp_suspend.h"
 #include <linux/of_gpio.h>
 #define GSL_DEBUG 0

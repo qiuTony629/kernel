@@ -80,6 +80,4 @@ source "drivers/staging/qlge/Kconfig"
 
 source "drivers/staging/vme_user/Kconfig"
 
-source "drivers/staging/rtl8723cs/Kconfig"
-
 endif # STAGING

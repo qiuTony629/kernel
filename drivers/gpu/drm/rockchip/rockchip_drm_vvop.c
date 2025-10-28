@@ -10,8 +10,6 @@
 #include <drm/drm_gem.h>
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_crtc_helper.h>
-#include <drm/drm_edid.h>
-#include <drm/drm_fourcc.h>
 #include <drm/drm_gem_framebuffer_helper.h>
 #include <drm/drm_plane_helper.h>
 #include <drm/drm_probe_helper.h>
@@ -72,7 +70,8 @@ static const struct drm_plane_funcs vvop_plane_funcs = {
 	.atomic_destroy_state	= drm_atomic_helper_plane_destroy_state,
 };
 
-static void vvop_plane_atomic_update(struct drm_plane *plane, struct drm_atomic_state *state)
+static void vvop_plane_atomic_update(struct drm_plane *plane,
+				     struct drm_plane_state *old_state)
 {
 }
 
@@ -399,12 +398,14 @@ static const struct drm_crtc_funcs vvop_crtc_funcs = {
 	.disable_vblank		= vvop_disable_vblank,
 };
 
-static void vvop_crtc_atomic_enable(struct drm_crtc *crtc, struct drm_atomic_state *state)
+static void vvop_crtc_atomic_enable(struct drm_crtc *crtc,
+				    struct drm_crtc_state *old_state)
 {
 	drm_crtc_vblank_on(crtc);
 }
 
-static void vvop_crtc_atomic_disable(struct drm_crtc *crtc, struct drm_atomic_state *state)
+static void vvop_crtc_atomic_disable(struct drm_crtc *crtc,
+				     struct drm_crtc_state *old_state)
 {
 	unsigned long flags;
 
@@ -419,7 +420,8 @@ static void vvop_crtc_atomic_disable(struct drm_crtc *crtc, struct drm_atomic_st
 
 }
 
-static void vvop_crtc_atomic_flush(struct drm_crtc *crtc, struct drm_atomic_state *state)
+static void vvop_crtc_atomic_flush(struct drm_crtc *crtc,
+				   struct drm_crtc_state *old_crtc_state)
 {
 	unsigned long flags;
 

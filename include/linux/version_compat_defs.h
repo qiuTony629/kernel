@@ -101,7 +101,7 @@ typedef unsigned int __poll_t;
 	"* MALI kbase_mmap_min_addr compiled to (0UL), no runtime update possible! *"
 #endif /* CONFIG_MMU */
 #endif /* KERNEL_VERSION(6, 1, 0) <= LINUX_VERSION_CODE */
-#ifndef KBASE_TIMER_SETUP_ALREADY_DEFINED
+
 static inline void kbase_timer_setup(struct timer_list *timer,
 				     void (*callback)(struct timer_list *timer))
 {
@@ -111,7 +111,7 @@ static inline void kbase_timer_setup(struct timer_list *timer,
 	timer_setup(timer, callback, 0);
 #endif
 }
-#endif
+
 #ifndef WRITE_ONCE
 #ifdef ASSIGN_ONCE
 #define WRITE_ONCE(x, val) ASSIGN_ONCE(val, x)
@@ -250,7 +250,7 @@ static inline void vm_flags_clear(struct vm_area_struct *vma, vm_flags_t flags)
 	vma->vm_flags &= ~flags;
 }
 #endif
-#ifndef KBASE_UNPIN_USER_BUF_PAGE_ALREADY_DEFINED
+
 static inline void kbase_unpin_user_buf_page(struct page *page)
 {
 #if KERNEL_VERSION(5, 9, 0) > LINUX_VERSION_CODE
@@ -259,7 +259,7 @@ static inline void kbase_unpin_user_buf_page(struct page *page)
 	unpin_user_page(page);
 #endif
 }
-#endif
+
 static inline long kbase_get_user_pages(unsigned long start, unsigned long nr_pages,
 					unsigned int gup_flags, struct page **pages,
 					struct vm_area_struct **vmas)

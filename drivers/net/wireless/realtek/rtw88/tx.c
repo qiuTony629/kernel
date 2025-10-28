@@ -32,7 +32,8 @@ void rtw_tx_stats(struct rtw_dev *rtwdev, struct ieee80211_vif *vif,
 	}
 }
 
-void rtw_tx_fill_tx_desc(struct rtw_tx_pkt_info *pkt_info, struct sk_buff *skb)
+void rtw_tx_fill_tx_desc(struct rtw_dev *rtwdev,
+			 struct rtw_tx_pkt_info *pkt_info, struct sk_buff *skb)
 {
 	struct rtw_tx_desc *tx_desc = (struct rtw_tx_desc *)skb->data;
 	bool more_data = false;
@@ -46,7 +47,8 @@ void rtw_tx_fill_tx_desc(struct rtw_tx_pkt_info *pkt_info, struct sk_buff *skb)
 		      le32_encode_bits(pkt_info->ls, RTW_TX_DESC_W0_LS) |
 		      le32_encode_bits(pkt_info->dis_qselseq, RTW_TX_DESC_W0_DISQSELSEQ);
 
-	tx_desc->w1 = le32_encode_bits(pkt_info->qsel, RTW_TX_DESC_W1_QSEL) |
+	tx_desc->w1 = le32_encode_bits(pkt_info->mac_id, RTW_TX_DESC_W1_MACID) |
+		      le32_encode_bits(pkt_info->qsel, RTW_TX_DESC_W1_QSEL) |
 		      le32_encode_bits(pkt_info->rate_id, RTW_TX_DESC_W1_RATE_ID) |
 		      le32_encode_bits(pkt_info->sec_type, RTW_TX_DESC_W1_SEC_TYPE) |
 		      le32_encode_bits(pkt_info->pkt_offset, RTW_TX_DESC_W1_PKT_OFFSET) |
@@ -65,6 +67,9 @@ void rtw_tx_fill_tx_desc(struct rtw_tx_pkt_info *pkt_info, struct sk_buff *skb)
 		      le32_encode_bits(pkt_info->ampdu_factor, RTW_TX_DESC_W3_MAX_AGG_NUM);
 
 	tx_desc->w4 = le32_encode_bits(pkt_info->rate, RTW_TX_DESC_W4_DATARATE);
+
+	if (rtwdev->chip->old_datarate_fb_limit)
+		tx_desc->w4 |= le32_encode_bits(0x1f, RTW_TX_DESC_W4_DATARATE_FB_LIMIT);
 
 	tx_desc->w5 = le32_encode_bits(pkt_info->short_gi, RTW_TX_DESC_W5_DATA_SHORT) |
 		      le32_encode_bits(pkt_info->bw, RTW_TX_DESC_W5_DATA_BW) |
@@ -90,7 +95,11 @@ EXPORT_SYMBOL(rtw_tx_fill_tx_desc);
 
 static u8 get_tx_ampdu_factor(struct ieee80211_sta *sta)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
 	u8 exp = sta->deflink.ht_cap.ampdu_factor;
+#else
+	u8 exp = sta->ht_cap.ampdu_factor;
+#endif
 
 	/* the least ampdu factor is 8K, and the value in the tx desc is the
 	 * max aggregation num, which represents val * 2 packets can be
@@ -101,7 +110,11 @@ static u8 get_tx_ampdu_factor(struct ieee80211_sta *sta)
 
 static u8 get_tx_ampdu_density(struct ieee80211_sta *sta)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
 	return sta->deflink.ht_cap.ampdu_density;
+#else
+	return sta->ht_cap.ampdu_density;
+#endif
 }
 
 static u8 get_highest_ht_tx_rate(struct rtw_dev *rtwdev,
@@ -109,7 +122,11 @@ static u8 get_highest_ht_tx_rate(struct rtw_dev *rtwdev,
 {
 	u8 rate;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
 	if (rtwdev->hal.rf_type == RF_2T2R && sta->deflink.ht_cap.mcs.rx_mask[1] != 0)
+#else
+	if (rtwdev->hal.rf_type == RF_2T2R && sta->ht_cap.mcs.rx_mask[1] != 0)
+#endif
 		rate = DESC_RATEMCS15;
 	else
 		rate = DESC_RATEMCS7;
@@ -124,7 +141,11 @@ static u8 get_highest_vht_tx_rate(struct rtw_dev *rtwdev,
 	u8 rate;
 	u16 tx_mcs_map;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
 	tx_mcs_map = le16_to_cpu(sta->deflink.vht_cap.vht_mcs.tx_mcs_map);
+#else
+	tx_mcs_map = le16_to_cpu(sta->vht_cap.vht_mcs.tx_mcs_map);
+#endif
 	if (efuse->hw_cap.nss == 1) {
 		switch (tx_mcs_map & 0x3) {
 		case IEEE80211_VHT_MCS_SUPPORT_0_7:
@@ -171,22 +192,28 @@ static void rtw_tx_report_enable(struct rtw_dev *rtwdev,
 	pkt_info->report = true;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
 void rtw_tx_report_purge_timer(struct timer_list *t)
+#else
+void rtw_tx_report_purge_timer(void *cntx)
+#endif
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
 	struct rtw_dev *rtwdev = from_timer(rtwdev, t, tx_report.purge_timer);
+#else
+	struct rtw_dev *rtwdev = (struct rtw_dev *)cntx;
+#endif
 	struct rtw_tx_report *tx_report = &rtwdev->tx_report;
 	unsigned long flags;
 
-	uint32_t qlen;
+	if (skb_queue_len(&tx_report->queue) == 0)
+		return;
+
+	rtw_warn(rtwdev, "failed to get tx report from firmware\n");
 
 	spin_lock_irqsave(&tx_report->q_lock, flags);
-	qlen = skb_queue_len(&tx_report->queue);
-	if (qlen > 0)
-		skb_queue_purge(&tx_report->queue);
+	skb_queue_purge(&tx_report->queue);
 	spin_unlock_irqrestore(&tx_report->q_lock, flags);
-
-	rtw_dbg(rtwdev, RTW_DBG_TX, "failed to get tx report from firmware: "
-		"txreport qlen %u\n", qlen);
 }
 
 void rtw_tx_report_enqueue(struct rtw_dev *rtwdev, struct sk_buff *skb, u8 sn)
@@ -244,7 +271,7 @@ void rtw_tx_report_handle(struct rtw_dev *rtwdev, struct sk_buff *skb, int src)
 	spin_lock_irqsave(&tx_report->q_lock, flags);
 	skb_queue_walk_safe(&tx_report->queue, cur, tmp) {
 		n = (u8 *)IEEE80211_SKB_CB(cur)->status.status_driver_data;
-		if (*n == sn) {
+		if (*n == sn || !rtwdev->chip->tx_report_sn) {
 			__skb_unlink(cur, &tx_report->queue);
 			rtw_tx_report_tx_status(rtwdev, cur, st == 0);
 			break;
@@ -360,6 +387,7 @@ static void rtw_tx_data_pkt_info_update(struct rtw_dev *rtwdev,
 	if (info->control.use_rts || skb->len > hw->wiphy->rts_threshold)
 		pkt_info->rts = true;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
 	if (sta->deflink.vht_cap.vht_supported)
 		rate = get_highest_vht_tx_rate(rtwdev, sta);
 	else if (sta->deflink.ht_cap.ht_supported)
@@ -368,6 +396,16 @@ static void rtw_tx_data_pkt_info_update(struct rtw_dev *rtwdev,
 		rate = DESC_RATE11M;
 	else
 		rate = DESC_RATE54M;
+#else
+	if (sta->vht_cap.vht_supported)
+		rate = get_highest_vht_tx_rate(rtwdev, sta);
+	else if (sta->ht_cap.ht_supported)
+		rate = get_highest_ht_tx_rate(rtwdev, sta);
+	else if (sta->supp_rates[0] <= 0xf)
+		rate = DESC_RATE11M;
+	else
+		rate = DESC_RATE54M;
+#endif
 
 	si = (struct rtw_sta_info *)sta->drv_priv;
 
@@ -403,14 +441,18 @@ void rtw_tx_pkt_info_update(struct rtw_dev *rtwdev,
 	const struct rtw_chip_info *chip = rtwdev->chip;
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
+	struct ieee80211_vif *vif = info->control.vif;
 	struct rtw_sta_info *si;
-	struct ieee80211_vif *vif = NULL;
+	struct rtw_vif *rtwvif;
 	__le16 fc = hdr->frame_control;
 	bool bmc;
 
 	if (sta) {
 		si = (struct rtw_sta_info *)sta->drv_priv;
-		vif = si->vif;
+		pkt_info->mac_id = si->mac_id;
+	} else if (vif) {
+		rtwvif = (struct rtw_vif *)vif->drv_priv;
+		pkt_info->mac_id = rtwvif->mac_id;
 	}
 
 	if (ieee80211_is_mgmt(fc) || ieee80211_is_nullfunc(fc))
@@ -658,9 +700,8 @@ void __rtw_tx_work(struct rtw_dev *rtwdev)
 	list_for_each_entry_safe(rtwtxq, tmp, &rtwdev->txqs, list) {
 		struct ieee80211_txq *txq = rtwtxq_to_txq(rtwtxq);
 		unsigned long frame_cnt;
-		unsigned long byte_cnt;
 
-		ieee80211_txq_get_depth(txq, &frame_cnt, &byte_cnt);
+		ieee80211_txq_get_depth(txq, &frame_cnt, NULL);
 		rtw_txq_push(rtwdev, rtwtxq, frame_cnt);
 
 		list_del_init(&rtwtxq->list);

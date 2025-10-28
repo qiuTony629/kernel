@@ -493,7 +493,6 @@ struct tcpm_port {
 	int logbuffer_tail;
 	u8 *logbuffer[LOG_BUFFER_ENTRIES];
 #endif
-	bool faster_pd_negotiation;
 };
 
 struct pd_rx_event {
@@ -2448,7 +2447,7 @@ static int tcpm_register_source_caps(struct tcpm_port *port)
 {
 	struct usb_power_delivery_desc desc = { port->negotiated_rev };
 	struct usb_power_delivery_capabilities_desc caps = { };
-	struct usb_power_delivery_capabilities *cap = port->partner_source_caps;
+	struct usb_power_delivery_capabilities *cap;
 
 	if (!port->partner_pd)
 		port->partner_pd = usb_power_delivery_register(NULL, &desc);
@@ -2457,11 +2456,6 @@ static int tcpm_register_source_caps(struct tcpm_port *port)
 
 	memcpy(caps.pdo, port->source_caps, sizeof(u32) * port->nr_source_caps);
 	caps.role = TYPEC_SOURCE;
-
-	if (cap) {
-		usb_power_delivery_unregister_capabilities(cap);
-		port->partner_source_caps = NULL;
-	}
 
 	cap = usb_power_delivery_register_capabilities(port->partner_pd, &caps);
 	if (IS_ERR(cap))
@@ -2476,7 +2470,7 @@ static int tcpm_register_sink_caps(struct tcpm_port *port)
 {
 	struct usb_power_delivery_desc desc = { port->negotiated_rev };
 	struct usb_power_delivery_capabilities_desc caps = { };
-	struct usb_power_delivery_capabilities *cap;
+	struct usb_power_delivery_capabilities *cap = port->partner_source_caps;
 
 	if (!port->partner_pd)
 		port->partner_pd = usb_power_delivery_register(NULL, &desc);
@@ -2485,6 +2479,11 @@ static int tcpm_register_sink_caps(struct tcpm_port *port)
 
 	memcpy(caps.pdo, port->sink_caps, sizeof(u32) * port->nr_sink_caps);
 	caps.role = TYPEC_SINK;
+
+	if (cap) {
+		usb_power_delivery_unregister_capabilities(cap);
+		port->partner_source_caps = NULL;
+	}
 
 	cap = usb_power_delivery_register_capabilities(port->partner_pd, &caps);
 	if (IS_ERR(cap))
@@ -4297,10 +4296,10 @@ static void run_state_machine(struct tcpm_port *port)
 		    (port->cc1 != TYPEC_CC_OPEN &&
 		     port->cc2 == TYPEC_CC_OPEN))
 			tcpm_set_state(port, SNK_DEBOUNCED,
-				       port->faster_pd_negotiation ? 100 : PD_T_CC_DEBOUNCE);
+				       PD_T_CC_DEBOUNCE);
 		else if (tcpm_port_is_disconnected(port))
 			tcpm_set_state(port, SNK_UNATTACHED,
-				       port->faster_pd_negotiation ? 100 : PD_T_CC_DEBOUNCE);
+				       PD_T_PD_DEBOUNCE);
 		else if (tcpm_port_is_sink(port))
 			tcpm_set_state(port, SNK_DEBOUNCED, 0);
 		break;
@@ -4435,7 +4434,7 @@ static void run_state_machine(struct tcpm_port *port)
 		if (port->vbus_never_low) {
 			port->vbus_never_low = false;
 			tcpm_set_state(port, SNK_SOFT_RESET,
-				       port->faster_pd_negotiation ? 100 : PD_T_SINK_WAIT_CAP);
+				       PD_T_SINK_WAIT_CAP);
 		} else {
 			tcpm_set_state(port, hard_reset_state(port),
 				       PD_T_SINK_WAIT_CAP);
@@ -4984,7 +4983,7 @@ static void run_state_machine(struct tcpm_port *port)
 	case PORT_RESET_WAIT_OFF:
 		tcpm_set_state(port,
 			       tcpm_default_state(port),
-			       port->vbus_present ? port->faster_pd_negotiation ? 100 : PD_T_PS_SOURCE_OFF : 0);
+			       port->vbus_present ? PD_T_PS_SOURCE_OFF : 0);
 		break;
 
 	/* AMS intermediate state */
@@ -6309,8 +6308,6 @@ sink:
 	if (fwnode_property_read_u32(fwnode, "op-sink-microwatt", &mw) < 0)
 		return -EINVAL;
 	port->operating_snk_mw = mw / 1000;
-
-	port->faster_pd_negotiation = fwnode_property_read_bool(fwnode, "faster-pd-negotiation");
 
 	/* FRS can only be supported by DRP ports */
 	if (port->port_type == TYPEC_PORT_DRP) {

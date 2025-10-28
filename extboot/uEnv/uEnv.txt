@@ -1,0 +1,12 @@
+uname_r=6.1.99-rk3588
+initrd=initrd-6.1
+size=0x1000000
+cmdline="psi=1 earlyprintk console=ttyFIQ0 console=tty1 consoleblank=0 loglevel=7 rootwait rw rootfstype=ext4"
+
+enable_uboot_overlays=0
+#overlay_start
+
+#dtoverlay=/dtb/overlay/rk35xx-lubancat-xxx-overlay.dtbo
+#dtoverlay=/dtb/overlay/rk35xx-lubancat-xxx-overlay.dtbo
+
+#overlay_end

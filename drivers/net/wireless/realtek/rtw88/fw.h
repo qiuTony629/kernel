@@ -29,6 +29,8 @@
 #define BCN_FILTER_CONNECTION_LOSS	1
 #define BCN_FILTER_CONNECTED		2
 #define BCN_FILTER_NOTIFY_BEACON_LOSS	3
+#define RTW_DEFAULT_CQM_THOLD		-70
+#define RTW_DEFAULT_CQM_HYST		4
 
 #define SCAN_NOTIFY_TIMEOUT  msecs_to_jiffies(10)
 
@@ -82,6 +84,20 @@ struct rtw_c2h_adaptivity {
 	u8 h2l;
 	u8 option;
 } __packed;
+
+struct rtw_c2h_ra_rpt {
+	u8 rate_sgi;
+	u8 mac_id;
+	u8 byte2;
+	u8 status;
+	u8 byte4;
+	u8 ra_ratio;
+	u8 bw;
+	u8 txcls_rate;
+} __packed;
+
+#define RTW_C2H_RA_RPT_RATE	GENMASK(6, 0)
+#define RTW_C2H_RA_RPT_SGI	BIT(7)
 
 struct rtw_h2c_register {
 	u32 w0;
@@ -362,10 +378,6 @@ struct rtw_fw_hdr_legacy {
 #define GET_CHAN_SWITCH_CENTRAL_CH(c2h_payload)	(c2h_payload[2])
 #define GET_CHAN_SWITCH_ID(c2h_payload)		(c2h_payload[3])
 #define GET_CHAN_SWITCH_STATUS(c2h_payload)	(c2h_payload[4])
-#define GET_RA_REPORT_RATE(c2h_payload)		(c2h_payload[0] & 0x7f)
-#define GET_RA_REPORT_SGI(c2h_payload)		((c2h_payload[0] & 0x80) >> 7)
-#define GET_RA_REPORT_BW(c2h_payload)		(c2h_payload[6])
-#define GET_RA_REPORT_MACID(c2h_payload)	(c2h_payload[1])
 
 #define GET_BCN_FILTER_NOTIFY_TYPE(c2h_payload)	(c2h_payload[1] & 0xf)
 #define GET_BCN_FILTER_NOTIFY_EVENT(c2h_payload)	(c2h_payload[1] & 0x10)
@@ -834,8 +846,12 @@ void rtw_fw_coex_query_hid_info(struct rtw_dev *rtwdev, u8 sub_id, u8 data);
 
 void rtw_fw_bt_wifi_control(struct rtw_dev *rtwdev, u8 op_code, u8 *data);
 void rtw_fw_send_rssi_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
 void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si,
 			 bool reset_ra_mask);
+#else
+void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si);
+#endif
 void rtw_fw_media_status_report(struct rtw_dev *rtwdev, u8 mac_id, bool conn);
 void rtw_fw_update_wl_phy_info(struct rtw_dev *rtwdev);
 void rtw_fw_beacon_filter_config(struct rtw_dev *rtwdev, bool connect,

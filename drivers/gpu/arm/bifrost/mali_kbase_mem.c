@@ -43,6 +43,7 @@
 #include <mmu/mali_kbase_mmu.h>
 #include <mali_kbase_config_defaults.h>
 #include <mali_kbase_trace_gpu_mem.h>
+#include <linux/version_compat_defs.h>
 
 #define VA_REGION_SLAB_NAME_PREFIX "va-region-slab-"
 #define VA_REGION_SLAB_NAME_SIZE (DEVNAME_SIZE + sizeof(VA_REGION_SLAB_NAME_PREFIX) + 1)
@@ -4920,15 +4921,6 @@ void kbase_jit_report_update_pressure(struct kbase_context *kctx,
 
 }
 #endif /* MALI_JIT_PRESSURE_LIMIT_BASE */
-
-void kbase_unpin_user_buf_page(struct page *page)
-{
-#if KERNEL_VERSION(5, 9, 0) > LINUX_VERSION_CODE
-	put_page(page);
-#else
-	unpin_user_page(page);
-#endif
-}
 
 #if MALI_USE_CSF
 static void kbase_jd_user_buf_unpin_pages(struct kbase_mem_phy_alloc *alloc)

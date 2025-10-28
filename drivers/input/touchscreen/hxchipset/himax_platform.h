@@ -1,15 +1,16 @@
-/* Himax Android Driver Sample Code for QCT platform
+/* SPDX-License-Identifier: GPL-2.0 */
+/*  Himax Android Driver Sample Code for QCT platform
  *
- * Copyright (C) 2021 Himax Corporation.
+ *  Copyright (C) 2024 Himax Corporation.
  *
- * This software is licensed under the terms of the GNU General Public
- * License version 2, as published by the Free Software Foundation, and
- * may be copied, distributed, and modified under those terms.
+ *  This software is licensed under the terms of the GNU General Public
+ *  License version 2,  as published by the Free Software Foundation,  and
+ *  may be copied,  distributed,  and modified under those terms.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  */
 
 #ifndef HIMAX_PLATFORM_H
@@ -22,19 +23,35 @@
 #include <linux/i2c.h>
 #include <linux/interrupt.h>
 
-#define HIMAX_I2C_PLATFORM
-#define HIMAX_I2C_RETRY_TIMES 3
+#if defined(CONFIG_HMX_DB)
+	#include <linux/regulator/consumer.h>
+#endif
+#ifdef CONFIG_SOCT_TEE_SUPPORT
+#include <linux/notifier.h>
+#include <touch/hxmax_ts.h>
+
+extern struct blocking_notifier_head himax_notifier_chain;
+#endif
+
+//#define HX_QCT_515
+#undef HX_QCT_515
+
+#define HIMAX_BUS_RETRY_TIMES 3
 #define BUS_RW_MAX_LEN 256
+#define BUS_R_HLEN 0
+#define BUS_R_DLEN ((BUS_RW_MAX_LEN-BUS_R_HLEN)-((BUS_RW_MAX_LEN-BUS_R_HLEN)%4))
+#define BUS_W_HLEN 1
+#define BUS_W_DLEN ((BUS_RW_MAX_LEN-BUS_W_HLEN)-((BUS_RW_MAX_LEN-BUS_W_HLEN)%4))
 
 #if defined(CONFIG_TOUCHSCREEN_HIMAX_DEBUG)
 #define D(x...) pr_debug("[HXTP] " x)
 #define I(x...) pr_info("[HXTP] " x)
 #define W(x...) pr_warn("[HXTP][WARNING] " x)
 #define E(x...) pr_err("[HXTP][ERROR] " x)
-#define DIF(x...)                                                                                  \
-	do {                                                                                       \
-		if (debug_flag)                                                                    \
-			pr_debug("[HXTP][DEBUG] " x)                                               \
+#define DIF(x...) \
+do { \
+	if (debug_flag) \
+		pr_debug("[HXTP][DEBUG] " x) \
 	} while (0)
 #else
 
@@ -45,16 +62,35 @@
 #define DIF(x...)
 #endif
 
-#define HIMAX_common_NAME "himax_tp"
-#define HIMAX_I2C_ADDR 0x48
-#define INPUT_DEV_NAME "himax-touchscreen"
+#if defined(CONFIG_HMX_DB)
 
-struct himax_i2c_platform_data {
-	int abs_x_min;
-	int abs_x_max;
+	/* Analog voltage @2.7 V */
+	#define HX_VTG_MIN_UV			2700000
+	#define HX_VTG_MAX_UV			3300000
+	#define HX_ACTIVE_LOAD_UA		15000
+	#define HX_LPM_LOAD_UA			10
+	/* Digital voltage @1.8 V */
+	#define HX_VTG_DIG_MIN_UV		1800000
+	#define HX_VTG_DIG_MAX_UV		1800000
+	#define HX_ACTIVE_LOAD_DIG_UA	10000
+	#define HX_LPM_LOAD_DIG_UA		10
+	#define HX_I2C_VTG_MIN_UV		1800000
+	#define HX_I2C_VTG_MAX_UV		1800000
+	#define HX_I2C_LOAD_UA			10000
+	#define HX_I2C_LPM_LOAD_UA		10
+
+#endif
+
+#define HIMAX_common_NAME			"himax_tp"
+#define HIMAX_I2C_ADDR				0x48
+#define INPUT_DEV_NAME				"himax-touchscreen"
+
+struct himax_platform_data {
+	uint32_t abs_x_min;
+	uint32_t abs_x_max;
 	int abs_x_fuzz;
-	int abs_y_min;
-	int abs_y_max;
+	uint32_t abs_y_min;
+	uint32_t abs_y_max;
 	int abs_y_fuzz;
 	int abs_pressure_min;
 	int abs_pressure_max;
@@ -69,48 +105,51 @@ struct himax_i2c_platform_data {
 	uint8_t cable_config[2];
 	uint8_t protocol_type;
 	int gpio_irq;
-	int fail_det;
 	int gpio_reset;
 	int gpio_3v3_en;
 	int gpio_pon;
 	int lcm_rst;
 	int (*power)(int on);
 	void (*reset)(void);
-	struct himax_virtual_key *virtual_key;
 	int hx_config_size;
-	const char *fw_name;
-	const char *criteria_file_name;
+
+#if defined(CONFIG_HMX_DB)
+	bool i2c_pull_up;
+	bool digital_pwr_regulator;
+	int reset_gpio;
+	u32 reset_gpio_flags;
+	int irq_gpio;
+	u32 irq_gpio_flags;
+	struct regulator *vcc_ana; /* For Dragon Board */
+	struct regulator *vcc_dig; /* For Dragon Board */
+	struct regulator *vcc_i2c; /* For Dragon Board */
+
+#endif
+
 };
 
-extern int himax_bus_read(struct himax_ts_data *ts, uint8_t command, uint8_t *data, uint32_t length,
-			  uint8_t toRetry);
-extern int himax_bus_write(struct himax_ts_data *ts, uint8_t command, uint8_t *data,
-			   uint32_t length, uint8_t toRetry);
-extern void himax_int_enable(struct himax_ts_data *ts, int enable);
-extern int himax_ts_register_interrupt(struct himax_ts_data *ts);
-extern int himax_fail_det_register_interrupt(struct himax_ts_data *ts);
-int himax_ts_unregister_interrupt(struct himax_ts_data *ts);
+extern int himax_bus_read(uint8_t cmd, uint8_t *buf, uint32_t len);
+extern int himax_bus_write(uint8_t cmd, uint32_t addr, uint8_t *data,
+	uint32_t len);
+extern void himax_int_enable(int enable);
+extern int himax_ts_register_interrupt(void);
+int himax_ts_unregister_interrupt(void);
 extern uint8_t himax_int_gpio_read(int pinnum);
-extern int himax_gpio_power_config(struct himax_ts_data *ts, struct himax_i2c_platform_data *pdata);
-void himax_gpio_power_deconfig(struct himax_i2c_platform_data *pdata);
+extern int himax_gpio_power_config(struct himax_platform_data *pdata);
+void himax_gpio_power_deconfig(struct himax_platform_data *pdata);
 
 #if defined(HX_CONFIG_FB)
-extern int himax_fb_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
+extern int fb_notifier_callback(struct notifier_block *self,
+		unsigned long event, void *data);
 #elif defined(HX_CONFIG_DRM)
-extern int himax_drm_notifier_callback(struct notifier_block *self, unsigned long event, void *data);
+extern int drm_notifier_callback(struct notifier_block *self,
+		unsigned long event, void *data);
 #endif
-extern int himax_hotplug_notifier(struct notifier_block *self, unsigned long event, void *data);
-
+extern struct himax_ts_data *hx_s_ts;
 extern void himax_ts_work(struct himax_ts_data *ts);
-extern void himax_fail_det_work(struct himax_ts_data *ts);
 extern enum hrtimer_restart himax_ts_timer_func(struct hrtimer *timer);
-extern int himax_chip_common_init(struct himax_ts_data *ts);
-extern void himax_chip_common_deinit(struct himax_ts_data *ts);
-extern int himax_sysfs_init(struct himax_ts_data *ts);
-extern void himax_sysfs_deinit(struct himax_ts_data *ts);
-int himax_int_en_set(struct himax_ts_data *ts);
-int tp_diag_himax(void);
-#if IS_ENABLED(CONFIG_TOUCHSCREEN_HIMAX_IC_HX83192)
-bool hx83192_chip_detect(struct himax_ts_data *ts);
+extern int himax_chip_common_init(void);
+extern void himax_chip_common_deinit(void);
+
 #endif
-#endif
+

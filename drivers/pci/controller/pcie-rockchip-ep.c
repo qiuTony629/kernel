@@ -2,7 +2,7 @@
 /*
  * Rockchip AXI PCIe endpoint controller driver
  *
- * Copyright (c) 2018 Rockchip Electronics Co., Ltd.
+ * Copyright (c) 2018 Rockchip, Inc.
  *
  * Author: Shawn Lin <shawn.lin@rock-chips.com>
  *         Simon Xue <xxm@rock-chips.com>

@@ -94,12 +94,6 @@ enum drm_driver_feature {
 	 * synchronization of command submission.
 	 */
 	DRIVER_SYNCOBJ_TIMELINE         = BIT(6),
-	/**
-	 * @DRIVER_GEM_GPUVA:
-	 *
-	 * Driver supports user defined GPU VA bindings for GEM objects.
-	 */
-	DRIVER_GEM_GPUVA		= BIT(8),
 
 	/* IMPORTANT: Below are all the legacy flags, add new ones above. */
 
@@ -307,14 +301,22 @@ struct drm_driver {
 	/**
 	 * @prime_handle_to_fd:
 	 *
-	 * PRIME export function. Only used by vmwgfx.
+	 * Main PRIME export function. Should be implemented with
+	 * drm_gem_prime_handle_to_fd() for GEM based drivers.
+	 *
+	 * For an in-depth discussion see :ref:`PRIME buffer sharing
+	 * documentation <prime_buffer_sharing>`.
 	 */
 	int (*prime_handle_to_fd)(struct drm_device *dev, struct drm_file *file_priv,
 				uint32_t handle, uint32_t flags, int *prime_fd);
 	/**
 	 * @prime_fd_to_handle:
 	 *
-	 * PRIME import function. Only used by vmwgfx.
+	 * Main PRIME import function. Should be implemented with
+	 * drm_gem_prime_fd_to_handle() for GEM based drivers.
+	 *
+	 * For an in-depth discussion see :ref:`PRIME buffer sharing
+	 * documentation <prime_buffer_sharing>`.
 	 */
 	int (*prime_fd_to_handle)(struct drm_device *dev, struct drm_file *file_priv,
 				int prime_fd, uint32_t *handle);
@@ -414,13 +416,6 @@ struct drm_driver {
 	int (*dumb_destroy)(struct drm_file *file_priv,
 			    struct drm_device *dev,
 			    uint32_t handle);
-
-	/**
-	 * @show_fdinfo:
-	 *
-	 * Print device specific fdinfo.  See Documentation/gpu/drm-usage-stats.rst.
-	 */
-	void (*show_fdinfo)(struct drm_printer *p, struct drm_file *f);
 
 	/** @major: driver major number */
 	int major;

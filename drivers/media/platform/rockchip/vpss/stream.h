@@ -178,7 +178,6 @@ struct rkvpss_stream {
 	bool is_crop_upd;
 	bool is_mf_upd;
 	bool is_pause;
-	bool is_attach_info;
 };
 
 /* rkvpss stream device */

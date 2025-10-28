@@ -143,12 +143,8 @@ static u32 rtw_sdio_to_io_address(struct rtw_dev *rtwdev, u32 addr,
 
 static bool rtw_sdio_use_direct_io(struct rtw_dev *rtwdev, u32 addr)
 {
-       if (!rtw_sdio_is_bus_addr(addr) &&
-           !test_bit(RTW_FLAG_POWERON, rtwdev->flags))
-               return false;
-
-       return !rtw_sdio_is_sdio30_supported(rtwdev) ||
-               rtw_sdio_is_bus_addr(addr);
+	return !rtw_sdio_is_sdio30_supported(rtwdev) ||
+		rtw_sdio_is_bus_addr(addr);
 }
 
 static int rtw_sdio_indirect_reg_cfg(struct rtw_dev *rtwdev, u32 addr, u32 cfg)
@@ -868,7 +864,7 @@ static void rtw_sdio_tx_skb_prepare(struct rtw_dev *rtwdev,
 
 	pkt_info->qsel = rtw_sdio_get_tx_qsel(rtwdev, skb, queue);
 
-	rtw_tx_fill_tx_desc(pkt_info, skb);
+	rtw_tx_fill_tx_desc(rtwdev, pkt_info, skb);
 	rtw_tx_fill_txdesc_checksum(rtwdev, pkt_info, pkt_desc);
 }
 
@@ -952,6 +948,7 @@ static void rtw_sdio_rx_skb(struct rtw_dev *rtwdev, struct sk_buff *skb,
 	skb_put(skb, pkt_stat->pkt_len);
 	skb_reserve(skb, pkt_offset);
 
+	rtw_update_rx_freq_for_invalid(rtwdev, skb, rx_status, pkt_stat);
 	rtw_rx_stats(rtwdev, pkt_stat->vif, skb);
 
 	ieee80211_rx_irqsafe(rtwdev->hw, skb);
@@ -984,8 +981,7 @@ static void rtw_sdio_rxfifo_recv(struct rtw_dev *rtwdev, u32 rx_len)
 
 	while (true) {
 		rx_desc = skb->data;
-		chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat,
-					 &rx_status);
+		rtw_rx_query_rx_desc(rtwdev, rx_desc, &pkt_stat, &rx_status);
 		pkt_offset = pkt_desc_sz + pkt_stat.drv_info_sz +
 			     pkt_stat.shift;
 
@@ -1160,6 +1156,7 @@ static struct rtw_hci_ops rtw_sdio_ops = {
 	.deep_ps = rtw_sdio_deep_ps,
 	.link_ps = rtw_sdio_link_ps,
 	.interface_cfg = rtw_sdio_interface_cfg,
+	.dynamic_rx_agg = NULL,
 
 	.read8 = rtw_sdio_read8,
 	.read16 = rtw_sdio_read16,
@@ -1299,12 +1296,19 @@ static void rtw_sdio_deinit_tx(struct rtw_dev *rtwdev)
 	struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
 	int i;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0)
 	for (i = 0; i < RTK_MAX_TX_QUEUE_NUM; i++)
 		skb_queue_purge(&rtwsdio->tx_queue[i]);
+#endif
 
 	flush_workqueue(rtwsdio->txwq);
 	destroy_workqueue(rtwsdio->txwq);
 	kfree(rtwsdio->tx_handler_data);
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 13, 0)
+	for (i = 0; i < RTK_MAX_TX_QUEUE_NUM; i++)
+		ieee80211_purge_tx_queue(rtwdev->hw, &rtwsdio->tx_queue[i]);
+#endif
 }
 
 int rtw_sdio_probe(struct sdio_func *sdio_func,
@@ -1329,6 +1333,34 @@ int rtw_sdio_probe(struct sdio_func *sdio_func,
 	rtwdev->hci.ops = &rtw_sdio_ops;
 	rtwdev->hci.type = RTW_HCI_TYPE_SDIO;
 
+	/* Insert a sleep of 500 ms. Without the delay, the wifi part
+	 * and the UART that controls Bluetooth interfere with one
+	 * another resulting in the following being logged:
+	 *
+	 * Start of SDIO probe function.
+	 * Bluetooth: HCI UART driver ver 2.3
+	 * Bluetooth: HCI UART protocol Three-wire (H5) registered
+	 * of_dma_request_slave_channel: dma-names property of node '/serial@fe650000'
+	 *	 missing or empty
+	 * dw-apb-uart fe650000.serial: failed to request DMA
+`	 * rtw_8821cs mmc3:0001:1: Firmware version 24.8.0, H2C version 12
+	 * rtw_8821cs mmc3:0001:1: sdio read32 failed (0x11080): -110
+	 *
+	 * If the UART is finished initializing before the SDIO probe
+	 * function startw, the following is logged:
+	 *
+	 * Bluetooth: HCI UART protocol Three-wire (H5) registered
+	 * of_dma_request_slave_channel: dma-names property of node '/serial@fe650000'
+	 *	missing or empty
+	 * dw-apb-uart fe650000.serial: failed to request DMA
+	 * Start of SDIO probe function.
+	 * rtw_8821cs mmc3:0001:1: Firmware version 24.8.0, H2C version 12
+	 * Bluetooth: hci0: RTL: examining hci_ver=08 hci_rev=000c lmp_ver=08 lmp_subver=8821
+	 * SDIO wifi works correctly.
+	 *
+	 * No adverse effects are observed from the delay.
+	 */
+	msleep(500);
 	ret = rtw_core_init(rtwdev);
 	if (ret)
 		goto err_release_hw;

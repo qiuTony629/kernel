@@ -1095,7 +1095,7 @@ static void sdhci_initialize_data(struct sdhci_host *host,
 	WARN_ON(host->data);
 
 	/* Sanity checks */
-	BUG_ON(data->blksz * data->blocks > host->mmc->max_req_size);
+	BUG_ON(data->blksz * data->blocks > 524288);
 	BUG_ON(data->blksz > host->mmc->max_blk_size);
 	BUG_ON(data->blocks > 65535);
 
@@ -1712,7 +1712,8 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 		flags |= SDHCI_CMD_INDEX;
 
 	/* CMD19 is special in that the Data Present Select should be set */
-	if (cmd->data || mmc_op_tuning(cmd->opcode))
+	if (cmd->data || cmd->opcode == MMC_SEND_TUNING_BLOCK ||
+	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
 		flags |= SDHCI_CMD_DATA;
 
 	timeout = jiffies;
@@ -3395,6 +3396,8 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
 
 static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
 {
+	u32 command;
+
 	/*
 	 * CMD19 generates _only_ Buffer Read Ready interrupt if
 	 * use sdhci_send_tuning.
@@ -3403,7 +3406,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
 	 * SDHCI_INT_DATA_AVAIL always there, stuck in irq storm.
 	 */
 	if (intmask & SDHCI_INT_DATA_AVAIL && !host->data) {
-		if (mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)))) {
+		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
+		if (command == MMC_SEND_TUNING_BLOCK ||
+		    command == MMC_SEND_TUNING_BLOCK_HS200) {
 			host->tuning_done = 1;
 			wake_up(&host->buf_ready_int);
 			return;
@@ -4724,18 +4729,11 @@ int sdhci_setup_host(struct sdhci_host *host)
 
 	/*
 	 * Maximum number of sectors in one transfer. Limited by SDMA boundary
-	 * size and by tuning modes on ADMA. On tuning mode 3 16MiB is more than
-	 * enough to cover big data transfers.
+	 * size (512KiB). Note some tuning modes impose a 4MiB limit, but this
+	 * is less anyway.
 	 */
-	if (host->flags & SDHCI_USE_ADMA) {
-		if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-			mmc->max_req_size = SZ_4M;
-		else
-			mmc->max_req_size = SZ_16M;
-	} else {
-		/* On PIO/SDMA use SDMA boundary size (512KiB). */
-		mmc->max_req_size = SZ_512K;
-	}
+	mmc->max_req_size = 524288;
+
 	/*
 	 * Maximum number of segments. Depends on if the hardware
 	 * can do scatter/gather or not.

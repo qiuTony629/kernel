@@ -46,7 +46,7 @@
 #include <mali_kbase_caps.h>
 #include <mali_kbase_trace_gpu_mem.h>
 #include <mali_kbase_reset_gpu.h>
-
+#include <linux/version_compat_defs.h>
 #if ((KERNEL_VERSION(5, 3, 0) <= LINUX_VERSION_CODE) || \
 	(KERNEL_VERSION(5, 0, 0) > LINUX_VERSION_CODE))
 /* Enable workaround for ion for kernels prior to v5.0.0 and from v5.3.0

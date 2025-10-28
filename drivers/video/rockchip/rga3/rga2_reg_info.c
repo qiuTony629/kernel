@@ -2470,8 +2470,6 @@ static void rga_cmd_to_rga2_cmd(struct rga_scheduler_t *scheduler,
 	    (req->rotate_mode == 0)) {
 		if (req->src.format == RGA_FORMAT_YCbCr_420_SP_10B ||
 		    req->src.format == RGA_FORMAT_YCrCb_420_SP_10B ||
-		    req->src.format == RGA_FORMAT_YCbCr_422_SP_10B ||
-		    req->src.format == RGA_FORMAT_YCrCb_422_SP_10B ||
 		    req->src.format == RGA_FORMAT_YCbCr_444_SP ||
 		    req->src.format == RGA_FORMAT_YCrCb_444_SP ||
 		    req->dst.format == RGA_FORMAT_YCbCr_444_SP ||
@@ -2598,7 +2596,7 @@ static void rga_cmd_to_rga2_cmd(struct rga_scheduler_t *scheduler,
 					req->alpha_config.bg_global_alpha_value = 0xff;
 				}
 			} else {
-				req->alpha_config.fg_global_alpha_value = 0xff;
+				req->alpha_config.bg_global_alpha_value = 0xff;
 				req->alpha_config.bg_global_alpha_value = 0xff;
 			}
 
@@ -2741,20 +2739,24 @@ static int rga2_check_param(struct rga_job *job,
 static int rga2_align_check(struct rga_job *job, struct rga2_req *req)
 {
 	if (rga_is_yuv10bit_format(req->src.format))
-		if ((req->src.x_offset % 2) || (req->src.y_offset % 2) ||
-		    (req->src.act_w % 2) || (req->src.act_w % 2))
+		if ((req->src.vir_w % 16) || (req->src.x_offset % 2) ||
+			(req->src.act_w % 2) || (req->src.y_offset % 2) ||
+			(req->src.act_h % 2) || (req->src.vir_h % 2))
 			rga_job_log(job, "err src wstride, 10bit yuv\n");
 	if (rga_is_yuv10bit_format(req->dst.format))
-		if ((req->dst.x_offset % 2) || (req->dst.y_offset % 2) ||
-		    (req->dst.act_w % 2) || (req->dst.act_w % 2))
+		if ((req->dst.vir_w % 16) || (req->dst.x_offset % 2) ||
+			(req->dst.act_w % 2) || (req->dst.y_offset % 2) ||
+			(req->dst.act_h % 2) || (req->dst.vir_h % 2))
 			rga_job_log(job, "err dst wstride, 10bit yuv\n");
 	if (rga_is_yuv8bit_format(req->src.format))
-		if ((req->src.x_offset % 2) || (req->src.y_offset % 2) ||
-		    (req->src.act_w % 2) || (req->src.act_w % 2))
+		if ((req->src.vir_w % 4) || (req->src.x_offset % 2) ||
+			(req->src.act_w % 2) || (req->src.y_offset % 2) ||
+			(req->src.act_h % 2) || (req->src.vir_h % 2))
 			rga_job_log(job, "err src wstride, 8bit yuv\n");
 	if (rga_is_yuv8bit_format(req->dst.format))
-		if ((req->dst.x_offset % 2) || (req->dst.y_offset % 2) ||
-		    (req->dst.act_w % 2) || (req->dst.act_w % 2))
+		if ((req->dst.vir_w % 4) || (req->dst.x_offset % 2) ||
+			(req->dst.act_w % 2) || (req->dst.y_offset % 2) ||
+			(req->dst.act_h % 2) || (req->dst.vir_h % 2))
 			rga_job_log(job, "err dst wstride, 8bit yuv\n");
 
 	return 0;
