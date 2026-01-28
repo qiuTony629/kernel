@@ -9,6 +9,7 @@
 /dts-v1/;
 
 #include "rk3588s-nanopi-r6-common.dtsi"
+#include <dt-bindings/display/drm_mipi_dsi.h>
 
 / {
 	model = "FriendlyElec NanoPi M6";
@@ -134,9 +135,94 @@
 		vin-supply = <&vcc5v0_usb>;
 	};
 
-	pwm_backlight: pwm-backlight {
-		status = "disabled";
+	backlight_dsi0: backlight-dsi0 {
+		status = "okay";
 		compatible = "pwm-backlight";
+		pwms = <&pwm10 0 25000 0>;
+		brightness-levels = <
+			0  20  20  21  21  22  22  23
+			23  24  24  25  25  26  26  27
+			27  28  28  29  29  30  30  31
+			31  32  32  33  33  34  34  35
+			35  36  36  37  37  38  38  39
+			40  41  42  43  44  45  46  47
+			48  49  50  51  52  53  54  55
+			56  57  58  59  60  61  62  63
+			64  65  66  67  68  69  70  71
+			72  73  74  75  76  77  78  79
+			80  81  82  83  84  85  86  87
+			88  89  90  91  92  93  94  95
+			96  97  98  99 100 101 102 103
+			104 105 106 107 108 109 110 111
+			112 113 114 115 116 117 118 119
+			120 121 122 123 124 125 126 127
+			128 129 130 131 132 133 134 135
+			136 137 138 139 140 141 142 143
+			144 145 146 147 148 149 150 151
+			152 153 154 155 156 157 158 159
+			160 161 162 163 164 165 166 167
+			168 169 170 171 172 173 174 175
+			176 177 178 179 180 181 182 183
+			184 185 186 187 188 189 190 191
+			192 193 194 195 196 197 198 199
+			200 201 202 203 204 205 206 207
+			208 209 210 211 212 213 214 215
+			216 217 218 219 220 221 222 223
+			224 225 226 227 228 229 230 231
+			232 233 234 235 236 237 238 239
+			240 241 242 243 244 245 246 247
+			248 249 250 251 252 253 254 255
+		>;
+		default-brightness-level = <200>;
+	};
+
+
+	mipi_dsi0_power: mipi-dsi0-power {
+		compatible = "regulator-fixed";
+		regulator-name = "mipi_dsi0_power";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	backlight_dsi1: backlight-dsi1 {
+		status = "okay";
+		compatible = "pwm-backlight";
+		pwms = <&pwm11 0 25000 0>;
+		brightness-levels = <
+			0  20  20  21  21  22  22  23
+			23  24  24  25  25  26  26  27
+			27  28  28  29  29  30  30  31
+			31  32  32  33  33  34  34  35
+			35  36  36  37  37  38  38  39
+			40  41  42  43  44  45  46  47
+			48  49  50  51  52  53  54  55
+			56  57  58  59  60  61  62  63
+			64  65  66  67  68  69  70  71
+			72  73  74  75  76  77  78  79
+			80  81  82  83  84  85  86  87
+			88  89  90  91  92  93  94  95
+			96  97  98  99 100 101 102 103
+			104 105 106 107 108 109 110 111
+			112 113 114 115 116 117 118 119
+			120 121 122 123 124 125 126 127
+			128 129 130 131 132 133 134 135
+			136 137 138 139 140 141 142 143
+			144 145 146 147 148 149 150 151
+			152 153 154 155 156 157 158 159
+			160 161 162 163 164 165 166 167
+			168 169 170 171 172 173 174 175
+			176 177 178 179 180 181 182 183
+			184 185 186 187 188 189 190 191
+			192 193 194 195 196 197 198 199
+			200 201 202 203 204 205 206 207
+			208 209 210 211 212 213 214 215
+			216 217 218 219 220 221 222 223
+			224 225 226 227 228 229 230 231
+			232 233 234 235 236 237 238 239
+			240 241 242 243 244 245 246 247
+			248 249 250 251 252 253 254 255
+		>;
+		default-brightness-level = <200>;
 	};
 };
 
@@ -505,5 +591,323 @@
 			reg = <0>;
 			remote-endpoint = <&mipi_lvds2_sditf>;
 		};
+	};
+};
+
+&dsi1 {
+	status = "disabled";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	dsi1_panel: panel@0 {
+		status = "okay";
+		compatible = "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight_dsi1>;
+		power-supply = <&mipi_dsi0_power>;
+		reset-gpios = <&gpio4 RK_PA1 GPIO_ACTIVE_LOW>;
+		enable-delay-ms = <35>;
+		prepare-delay-ms = <6>;
+		reset-delay-ms = <10>;
+		init-delay-ms = <150>;
+		unprepare-delay-ms = <0>;
+		disable-delay-ms = <20>;
+
+		size,width = <74>;
+		size,height = <133>;
+
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST | MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_NO_EOT_PACKET)>;
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes  = <4>;
+
+		panel-init-sequence = [
+			39 00 04 F0 99 22 0C
+			39 00 09 9D 00 00 04 1C 22 3A 40 58
+			39 00 21 B2 07 06 05 04 22 22 05 05 00 00 00 00 00 00 00 00 00 01 6E 00 00 00 00 00 00 55 55 05 10 20 11 00
+			39 00 21 B3 70 03 01 01 81 02 00 00 5A 00 00 00 00 00 03 FF C0 00 00 00 03 FF C0 00 00 00 00 00 00 00 00 00
+			39 00 21 B4 31 01 01 01 01 81 00 00 00 00 00 00 00 00 03 FF C0 00 00 00 03 FF C0 00 00 00 00 00 00 00 00 00
+			39 00 21 B6 1C 1C 1D 1D 1E 1E 82 3A 3A 82 C0 82 00 82 05 00 0D 0F 11 13 82 EC 82 ED FC 08 00 00 00 00 3C 00
+			39 00 21 B7 1C 1C 1D 1D 1E 1E 82 3A 3A 82 C0 82 00 82 04 00 0C 0E 10 12 82 EC 82 ED FC 08 00 00 00 00 3C 00
+			39 00 21 B9 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 00 00 0F 00 00 00 00 02
+			39 00 21 BA 00 55 55 55 55 55 55 55 55 55 55 55 55 00 00 00 00 00 03 00 00 00 00 00 03 00 00 00 00 00 00 00
+			39 00 21 BB 01 02 03 0A 04 13 14 12 16 5C 00 15 16 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 BC 00 00 00 00 04 00 FF F8 0B 11 50 5C 55 99 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 07 BD A1 A2 52 2E 00 8F
+			39 00 21 BE 23 0B 0B 0A 43 35 33 32 14 00 00 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 17 C0 40 93 FF FF FF 3F FF 00 FF 00 CC 04 12 35 67 89 A0 FF FF F0 0B EB
+			39 00 21 C1 00 00 20 26 C0 04 20 20 04 80 17 24 50 00 10 07 11 84 A0 00 93 10 10 00 00 00 00 00 00 00 00 00
+			39 00 21 C3 00 00 03 01 00 01 1D 1C 1C 22 22 22 00 FF 40 4D 2A 2A 2A 2A 2A 2A 2A 2A 00 00 00 00 00 00 00 00
+			39 00 21 C4 0C 97 A8 29 C0 3C 01 A0 00 0A 26 48 91 B3 75 00 F0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 C5 02 45 C8 40 78 04 02 02 08 04 14 42 05 03 01 20 0D 0A 05 12 80 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 C6 0A 13 28 46 46 28 3F 12 0D 0D 06 00 37 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 99 91 CB 01 3F 00 7A 00 30 22 01 A2 00 BA 00 24 05 24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 9A 11 35 01 00 FF 00 0A 00 17 00 22 6A 00 B9 B9 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			15 00 02 C2 00
+			39 00 1C C7 77 77 77 77 77 77 77 77 20 77 77 77 77 77 77 77 77 20 43 00 01 FF FF 40 DC DC 00
+			39 00 21 80 FF F6 E8 DE D6 CF C8 C3 BE AE A2 98 90 89 83 78 6F 67 5F 5F 57 50 48 3E 39 34 2D 25 1C 11 0F 0D
+			39 00 21 81 FF F6 E8 DE D6 CF C8 C3 BE AE A2 98 90 89 83 78 6F 67 5F 5F 57 50 48 3E 39 34 2D 25 1C 11 0F 0D
+			39 00 21 82 FF F6 E8 DE D6 CF C8 C3 BE AE A2 98 90 89 83 78 6F 67 5F 5F 57 50 48 3E 39 34 2D 25 1C 11 0F 0D
+			39 00 21 83 09 0B 08 06 02 00 00 0B 08 06 02 00 00 0B 08 06 02 00 00 12 0E 0A 06 02 00 12 0E 0A 06 02 00 12
+			39 00 21 84 0E 0A 06 02 00 2E 0D AB A6 48 83 CB E1 7B 42 E0 DA BA 64 88 3C BE 17 B4 2E 0D AB A6 48 83 CB E1
+			39 00 1F 85 7B 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 0F D0 0C 23 18 00 00 00 80 0C DF 0F 40 00 08 18
+			39 00 03 91 F1 00
+			15 00 02 35 00
+			05 78 01 11
+			05 32 01 29
+			15 00 02 AC 05
+		];
+
+		panel-exit-sequence = [
+			05 78 01 28
+			05 00 01 10
+		];
+
+		disp1_timings: display-timings {
+			native-mode = <&dsi1_timing0>;
+			dsi1_timing0: timing0 {
+				clock-frequency = <137000000>;
+				hactive = <1080>;
+				vactive = <1920>;
+				hback-porch = <32>;
+				hfront-porch = <32>;
+				vback-porch = <32>;
+				vfront-porch = <38>;
+				hsync-len = <4>;
+				vsync-len = <4>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				panel_in_dsi1: endpoint {
+					remote-endpoint = <&dsi1_out_panel>;
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+			port@1 {
+			reg = <1>;
+			dsi1_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi1>;
+			};
+		};
+	};
+};
+
+&pwm11 {
+	pinctrl-0 = <&pwm11m3_pins>;
+	status = "okay";
+};
+
+&mipi_dcphy1 {
+	status = "disabled";
+};
+
+&route_dsi1 {
+	status = "disabled";
+	connect = <&vp3_out_dsi1>;
+};
+
+&dsi1_in_vp3 {
+	status = "disabled";
+};
+
+&dsi0 {
+	status = "disabled";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	dsi0_panel: panel@0 {
+		status = "okay";
+		compatible = "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight_dsi0>;
+		power-supply = <&mipi_dsi0_power>;
+		reset-gpios = <&gpio3 RK_PD2 GPIO_ACTIVE_LOW>;
+		enable-delay-ms = <35>;
+		prepare-delay-ms = <6>;
+		reset-delay-ms = <10>;
+		init-delay-ms = <150>;
+		unprepare-delay-ms = <0>;
+		disable-delay-ms = <20>;
+
+		size,width = <74>;
+		size,height = <133>;
+
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST | MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_NO_EOT_PACKET)>;
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes  = <4>;
+
+		panel-init-sequence = [
+			39 00 04 F0 99 22 0C
+			39 00 09 9D 00 00 04 1C 22 3A 40 58
+			39 00 21 B2 07 06 05 04 22 22 05 05 00 00 00 00 00 00 00 00 00 01 6E 00 00 00 00 00 00 55 55 05 10 20 11 00
+			39 00 21 B3 70 03 01 01 81 02 00 00 5A 00 00 00 00 00 03 FF C0 00 00 00 03 FF C0 00 00 00 00 00 00 00 00 00
+			39 00 21 B4 31 01 01 01 01 81 00 00 00 00 00 00 00 00 03 FF C0 00 00 00 03 FF C0 00 00 00 00 00 00 00 00 00
+			39 00 21 B6 1C 1C 1D 1D 1E 1E 82 3A 3A 82 C0 82 00 82 05 00 0D 0F 11 13 82 EC 82 ED FC 08 00 00 00 00 3C 00
+			39 00 21 B7 1C 1C 1D 1D 1E 1E 82 3A 3A 82 C0 82 00 82 04 00 0C 0E 10 12 82 EC 82 ED FC 08 00 00 00 00 3C 00
+			39 00 21 B9 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 12 33 21 00 00 0F 00 00 00 00 02
+			39 00 21 BA 00 55 55 55 55 55 55 55 55 55 55 55 55 00 00 00 00 00 03 00 00 00 00 00 03 00 00 00 00 00 00 00
+			39 00 21 BB 01 02 03 0A 04 13 14 12 16 5C 00 15 16 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 BC 00 00 00 00 04 00 FF F8 0B 11 50 5C 55 99 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 07 BD A1 A2 52 2E 00 8F
+			39 00 21 BE 23 0B 0B 0A 43 35 33 32 14 00 00 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 17 C0 40 93 FF FF FF 3F FF 00 FF 00 CC 04 12 35 67 89 A0 FF FF F0 0B EB
+			39 00 21 C1 00 00 20 26 C0 04 20 20 04 80 17 24 50 00 10 07 11 84 A0 00 93 10 10 00 00 00 00 00 00 00 00 00
+			39 00 21 C3 00 00 03 01 00 01 1D 1C 1C 22 22 22 00 FF 40 4D 2A 2A 2A 2A 2A 2A 2A 2A 00 00 00 00 00 00 00 00
+			39 00 21 C4 0C 97 A8 29 C0 3C 01 A0 00 0A 26 48 91 B3 75 00 F0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 C5 02 45 C8 40 78 04 02 02 08 04 14 42 05 03 01 20 0D 0A 05 12 80 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 C6 0A 13 28 46 46 28 3F 12 0D 0D 06 00 37 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 99 91 CB 01 3F 00 7A 00 30 22 01 A2 00 BA 00 24 05 24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 21 9A 11 35 01 00 FF 00 0A 00 17 00 22 6A 00 B9 B9 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			15 00 02 C2 00
+			39 00 1C C7 77 77 77 77 77 77 77 77 20 77 77 77 77 77 77 77 77 20 43 00 01 FF FF 40 DC DC 00
+			39 00 21 80 FF F6 E8 DE D6 CF C8 C3 BE AE A2 98 90 89 83 78 6F 67 5F 5F 57 50 48 3E 39 34 2D 25 1C 11 0F 0D
+			39 00 21 81 FF F6 E8 DE D6 CF C8 C3 BE AE A2 98 90 89 83 78 6F 67 5F 5F 57 50 48 3E 39 34 2D 25 1C 11 0F 0D
+			39 00 21 82 FF F6 E8 DE D6 CF C8 C3 BE AE A2 98 90 89 83 78 6F 67 5F 5F 57 50 48 3E 39 34 2D 25 1C 11 0F 0D
+			39 00 21 83 09 0B 08 06 02 00 00 0B 08 06 02 00 00 0B 08 06 02 00 00 12 0E 0A 06 02 00 12 0E 0A 06 02 00 12
+			39 00 21 84 0E 0A 06 02 00 2E 0D AB A6 48 83 CB E1 7B 42 E0 DA BA 64 88 3C BE 17 B4 2E 0D AB A6 48 83 CB E1
+			39 00 1F 85 7B 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			39 00 0F D0 0C 23 18 00 00 00 80 0C DF 0F 40 00 08 18
+			39 00 03 91 F1 00
+			15 00 02 35 00
+			05 78 01 11
+			05 32 01 29
+			15 00 02 AC 05
+		];
+
+		panel-exit-sequence = [
+			05 78 01 28
+			05 00 01 10
+		];
+
+		disp0_timings0: display-timings {
+			native-mode = <&dsi0_timing0>;
+			dsi0_timing0: timing0 {
+				clock-frequency = <137000000>;
+				hactive = <1080>;
+				vactive = <1920>;
+				hback-porch = <32>;
+				hfront-porch = <32>;
+				vback-porch = <32>;
+				vfront-porch = <38>;
+				hsync-len = <4>;
+				vsync-len = <4>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				panel_in_dsi0: endpoint {
+					remote-endpoint = <&dsi0_out_panel>;
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+			port@1 {
+			reg = <1>;
+			dsi0_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi0>;
+			};
+		};
+	};
+};
+
+&pwm10 {
+	pinctrl-0 = <&pwm10m2_pins>;
+	status = "okay";
+};
+
+&mipi_dcphy0 {
+	status = "disabled";
+};
+
+&route_dsi0 {
+	status = "disabled";
+	connect = <&vp2_out_dsi0>;
+};
+
+&dsi0_in_vp2 {
+	status = "disabled";
+};
+
+&i2c4 {
+	pinctrl-0 = <&i2c4m3_xfer>;
+	status = "disabled";
+
+	chipone_tddi@48 {
+		compatible = "chipone-tddi";
+		reg = <0x48>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <RK_PC0 0x2008>;
+		chipone,rst-gpio = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
+		chipone,irq-gpio = <&gpio3 RK_PC0 GPIO_ACTIVE_HIGH>;
+		chipone,x-res = <1080>;
+		chipone,y-res = <1920>;
+		/* Charger detect */
+		chipone,touch-charger-detect-enable;
+		chipone,touch-charger-detect-type = "notify";/* notify,poll*/
+		chipone,touch-charger-detect-psy-name = "charger";/* usb */
+		chipone,touch-charger-detect-psp = " POWER_SUPPLY_PROP_ONLINE ";
+		chipone,touch-charger-detect-psp-poll-interval = <1000>;
+		/* Earjack detect (unused on this platform) */
+		// chipone,touch-earjack-detect-enable;
+		// chipone,touch-earjack-state-filepath =
+		// "/sys/bus/platform/drivers/Accdet_Driver/state";
+		// chipone,touch-earjack-poll-interval = <1000>;
+		rockchip,panel-notifier = <&dsi0_panel>;
+	};
+};
+
+&i2c5 {
+	pinctrl-0 = <&i2c5m2_xfer>;
+	status = "disabled";
+
+	chipone_tddi@48 {
+		compatible = "chipone-tddi";
+		reg = <0x48>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <RK_PA0 0x2008>;
+		chipone,rst-gpio = <&gpio4 RK_PA2 GPIO_ACTIVE_HIGH>;
+		chipone,irq-gpio = <&gpio4 RK_PA0 GPIO_ACTIVE_HIGH>;
+		chipone,x-res = <1080>;
+		chipone,y-res = <1920>;
+		/* Note: For independent displays, coordinate offset is not needed.
+		 * User-space should map input devices to displays via device name
+		 * (chipone-tddi-i2c4 / chipone-tddi-i2c5) or panel_name sysfs attribute.
+		 */
+		/* Charger detect */
+		chipone,touch-charger-detect-enable;
+		chipone,touch-charger-detect-type = "notify";/* notify,poll*/
+		chipone,touch-charger-detect-psy-name = "charger";/* usb */
+		chipone,touch-charger-detect-psp = " POWER_SUPPLY_PROP_ONLINE ";
+		chipone,touch-charger-detect-psp-poll-interval = <1000>;
+		/* Earjack detect (unused on this platform) */
+		// chipone,touch-earjack-detect-enable;
+		// chipone,touch-earjack-state-filepath =
+		// "/sys/bus/platform/drivers/Accdet_Driver/state";
+		// chipone,touch-earjack-poll-interval = <1000>;
+		rockchip,panel-notifier = <&dsi1_panel>;
 	};
 };

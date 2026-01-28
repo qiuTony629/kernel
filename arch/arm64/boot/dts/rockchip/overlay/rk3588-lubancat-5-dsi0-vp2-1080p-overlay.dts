@@ -47,7 +47,7 @@
 				reg = <0>;
 				backlight = <&backlight_dsi0>;
 				power-supply = <&mipi_dsi0_power>;
-				reset-gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_LOW>;
+				reset-gpios = <&gpio3 RK_PD2 GPIO_ACTIVE_LOW>;
 
 				enable-delay-ms = <35>;
 				prepare-delay-ms = <6>;
@@ -64,24 +64,103 @@
 				dsi,lanes  = <4>;
 
 				panel-init-sequence = [
-					39 00 04 B9 FF 83 99
-					15 00 02 D2 77
-					39 00 10 B1 02 04 74 94 01 32 33 11 11 AB 4D 56 73 02 02
-					39 00 10 B2 00 80 80 AE 05 07 5A 11 00 00 10 1E 70 03 D4
-					15 00 02 36 02
-					39 00 2D B4 00 FF 02 C0 02 C0 00 00 08 00 04 06 00 32 04 0A 08 21 03 01 00 0F B8 8B 02 C0 02 C0 00 00 08 00 04 06 00 32 04 0A 08 01 00 0F B8 01
-					39 05 22 D3 00 00 00 00 00 00 06 00 00 10 04 00 04 00 00 00 00 00 00 00 00 00 00 01 00 05 05 07 00 00 00 05 40
-					39 05 21 D5 18 18 19 19 18 18 21 20 01 00 07 06 05 04 03 02 18 18 18 18 18 18 2F 2F 30 30 31 31 18 18 18 18
-					39 05 21 D6 18 18 19 19 40 40 20 21 06 07 00 01 02 03 04 05 40 40 40 40 40 40 2F 2F 30 30 31 31 40 40 40 40
-					39 00 11 D8 A2 AA 02 A0 A2 A8 02 A0 B0 00 00 00 B0 00 00 00
-					15 00 02 BD 01
-					39 00 11 D8 B0 00 00 00 B0 00 00 00 E2 AA 03 F0 E2 AA 03 F0
-					15 00 02 BD 02
-					39 00 09 D8 E2 AA 03 F0 E2 AA 03 F0
-					15 00 02 BD 00
-					39 00 03 B6 8D 8D
-					39 05 37 E0 00 0E 19 13 2E 39 48 44 4D 57 5F 66 6C 76 7F 85 8A 95 9A A4 9B AB B0 5C 58 64 77 00 0E 19 13 2E 39 48 44 4D 57 5F 66 6C 76 7F 85 8A 95 9A A4 9B AB B0 5C 58 64 77
+					39 00 05 FF AA 55 A5 80
+					15 00 02 6F 31
+					15 00 02 FA 00
+					39 00 05 FF AA 55 A5 00
+					39 00 06 F0 55 AA 52 08 00
+					15 00 02 B1 21
+					39 00 03 B2 10 82
+					39 00 03 B2 87 22
+					39 00 04 B4 25 02 8C
+					39 00 03 B5 0A 00
+					39 00 04 B8 00 04 02
+					39 00 0A B9 03 00 18 11 31 44 03 51 00
+					39 00 03 BA 00 32
+					39 00 03 BC 7F 00
+					39 00 05 BD 00 B6 10 10
+					39 00 03 C6 11 10
+					39 00 06 F0 55 AA 52 08 01
+					39 00 03 B1 11 11
+					39 00 07 B2 0D 0D 0D 0D 0D 0D
+					39 00 07 B3 19 23 19 23 19 23
+					39 00 07 B6 15 14 15 14 15 14
+					39 00 03 BC 5F 00
+					39 00 03 BD 5F 00
+					39 00 03 BE 00 DB
+					15 00 02 CA 0F
+					39 00 06 F0 55 AA 52 08 02
+					39 00 0F B0 00 09 1B 28 33 3D 45 30 2D 32 31 47 56 56
+					39 00 10 B1 4E 60 74 74 86 8E 9C 9C A5 AD B7 C2 CE DA FF
+					39 00 0F B2 00 09 1B 28 33 3D 45 30 2D 32 31 47 56 56
+					39 00 10 B3 4E 60 74 74 86 8E 9C 9C A5 AD B7 C2 CE DA FF
+					39 00 0F B4 00 09 1B 28 33 3D 45 30 2D 32 31 47 56 56
+					39 00 10 B5 4E 60 74 74 86 8E 9C 9C A5 AD B7 C2 CE DA FF
+					39 00 0F B6 00 09 1B 28 33 3D 45 30 2D 32 31 47 56 56
+					39 00 10 B7 4E 60 74 74 86 8E 9C 9C A5 AD B7 C2 CE DA FF
+					39 00 0F B8 00 09 1B 28 33 3D 45 30 2D 32 31 47 56 56
+					39 00 10 B9 4E 60 74 74 86 8E 9C 9C A5 AD B7 C2 CE DA FF
+					39 00 0F BA 00 09 1B 28 33 3D 45 30 2D 32 31 47 56 56
+					39 00 10 BB 4E 60 74 74 86 8E 9C 9C A5 AD B7 C2 CE DA FF
+					39 00 06 F0 55 AA 52 08 03
+					39 00 05 B0 00 00 00 00
+					39 00 05 B1 03 00 00 03
+					39 00 08 B2 00 00 64 00 64 05 02
+					39 00 03 B4 00 08
+					39 00 05 B5 12 28 06 06
+					39 00 06 BA 31 00 00 00 03
+					39 00 06 BB 31 00 00 00 03
+					39 00 06 F0 55 AA 52 08 05
+					39 00 04 B0 03 11 3F
+					39 00 03 B2 06 60
+					39 00 03 B3 10 33
+					15 00 02 B4 26
+					39 00 04 B5 06 20 00
+					39 00 04 B6 86 E0 00
+					39 00 06 BA 8E 00 00 A4 00
+					39 00 06 BB 06 00 00 20 00
+					39 00 06 BC 8E 00 00 A4 00
+					39 00 06 BD 2E 00 00 A4 00
+					39 00 06 BE 8E 00 00 A0 00
+					39 00 06 BF 06 00 00 24 00
+					15 00 02 C1 00
+					39 00 03 C8 05 10
+					39 00 03 C9 03 10
+					39 00 04 D0 00 0A 02
+					39 00 04 D1 00 0A 04
+					15 00 02 EC 12
+					15 00 02 ED 00
+					39 00 03 EE 03 00
+					39 00 06 B0 00 04 08 11 12
+					39 00 06 B1 1F 15 16 1F 1F
+					39 00 06 B2 1F 13 1F 1F 1F
+					39 00 06 B3 1F 19 19 19 19
+					39 00 06 B4 1B 1B 1B 1B 1D
+					39 00 04 B5 1D 1D 1D
+					39 00 06 B6 00 05 09 11 12
+					39 00 06 B7 1F 15 16 1F 1F
+					39 00 06 B8 1F 13 1F 1F 1F
+					39 00 06 B9 1F 19 19 19 19
+					39 00 06 BA 1B 1B 1B 1B 1D
+					39 00 04 BB 1D 1D 1D
+					39 00 06 C0 00 09 05 12 11
+					39 00 06 C1 1F 15 16 1F 1F
+					39 00 06 C2 1F 13 1F 1F 1F
+					39 00 06 C3 1F 19 19 19 19
+					39 00 06 C4 1B 1B 1B 1B 1D
+					39 00 04 C5 1D 1D 1D
+					39 00 06 C6 00 08 04 12 11
+					39 00 06 C7 1F 15 16 1F 1F
+					39 00 06 C8 1F 13 1F 1F 1F
+					39 00 06 C9 1F 19 19 19 19
+					39 00 06 CA 1B 1B 1B 1B 1D
+					39 00 04 CB 1D 1D 1D
+					39 00 04 D0 00 AA 0A
+					15 00 02 35 00
 					05 C8 01 11
+					15 00 02 FF 00 //CMD page select
+					15 00 02 34 00 //SET_TEAR_OFF
+					15 00 02 35 00 //SET_TEAR_ON
 					05 C8 01 29
 				];
 
@@ -93,15 +172,15 @@
 				disp0_timings0: display-timings {
 					native-mode = <&dsi0_timing0>;
 					dsi0_timing0: timing0 {
-						clock-frequency = <131376000>;
-						hactive = <1080>;
-						vactive = <1920>;
-						hsync-len = <10>;
-						hback-porch = <20>;
-						hfront-porch = <10>;
-						vsync-len = <5>;
-						vback-porch = <20>;
-						vfront-porch = <10>;
+						clock-frequency = <230163000>;
+						hactive = <1440>;
+						vactive = <2560>;
+						hsync-len = <2>;
+						hback-porch = <26>;
+						hfront-porch = <20>;
+						vsync-len = <2>;
+						vback-porch = <8>;
+						vfront-porch = <8>;
 						hsync-active = <0>;
 						vsync-active = <0>;
 						de-active = <0>;
@@ -136,23 +215,23 @@
 	};
 
 	fragment@4 {
-		target = <&i2c1>;
+		target = <&i2c4>;
 
 		__overlay__ {
 			status = "okay";
 			#address-cells = <1>;
 			#size-cells = <0>;
 			pinctrl-names = "default";
-			pinctrl-0 = <&i2c1m2_xfer>;
+			pinctrl-0 = <&i2c4m3_xfer>;
 
 			gt911_dsi0: gt911@5d {
 				status = "okay";
 				compatible = "goodix,gt911";
 				reg = <0x5d>;
-				interrupt-parent = <&gpio1>;
-				interrupts = <RK_PB3 IRQ_TYPE_LEVEL_LOW>;
-				reset-gpios = <&gpio1 RK_PB4 GPIO_ACTIVE_LOW>;
-				irq-gpios = <&gpio1 RK_PB3 GPIO_ACTIVE_HIGH>;
+				interrupt-parent = <&gpio3>;
+				interrupts = <RK_PC0 IRQ_TYPE_LEVEL_LOW>;
+				reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_LOW>;
+				irq-gpios = <&gpio3 RK_PC0 GPIO_ACTIVE_HIGH>;
 				touchscreen-inverted-x = <1>;
 				touchscreen-inverted-y = <1>;
 			};
@@ -166,7 +245,7 @@
 			backlight_dsi0: backlight-dsi0 {
 				status = "okay";
 				compatible = "pwm-backlight";
-				pwms = <&pwm0 0 25000 0>;
+				pwms = <&pwm10 0 25000 0>;
 				brightness-levels = <
 				0  20  20  21  21  22  22  23
 				23  24  24  25  25  26  26  27
@@ -207,10 +286,10 @@
 	};
 
 	fragment@6 {
-		target = <&pwm0>;
+		target = <&pwm10>;
 
 		__overlay__ {
-			pinctrl-0 = <&pwm0m0_pins>;
+			pinctrl-0 = <&pwm10m2_pins>;
 			status = "okay";
 		};
 	};

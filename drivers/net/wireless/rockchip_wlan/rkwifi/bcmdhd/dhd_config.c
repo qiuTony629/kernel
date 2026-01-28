@@ -1492,22 +1492,86 @@ dhd_conf_add_filepath(dhd_pub_t *dhd, char *pFilename)
 {
 	char path[WLC_IOCTL_SMLEN];
 	char *name_ptr, *module_name = NULL;
+	const char *base_path = NULL;
+	const char *last_slash = NULL;
+	const char *firmware_prefix = "/lib/firmware/";
+	int firmware_prefix_len = strlen(firmware_prefix);
+	int dir_len = 0;
+	int base_len = 0;
+	const char *relative_path = NULL;
 
 	if (strlen(pFilename)) {
 		name_ptr = path;
 		strcpy(name_ptr, "");
+#ifdef CONFIG_BCMDHD_FW_PATH
+		/* Extract directory from CONFIG_BCMDHD_FW_PATH */
+		base_path = CONFIG_BCMDHD_FW_PATH;
+		base_len = strlen(base_path);
+		if (base_len > 0) {
+			/* Check if path starts with /lib/firmware/ */
+			if (strncmp(base_path, firmware_prefix, firmware_prefix_len) == 0) {
+				/* Remove /lib/firmware/ prefix to use relative path */
+				relative_path = base_path + firmware_prefix_len;
+				base_len = strlen(relative_path);
+				if (base_len > 0) {
+					/* Check if it's already a directory path (ends with '/') */
+					if (relative_path[base_len - 1] == '/') {
+						/* It's a directory path, use it directly (without leading /) */
+						if (base_len < WLC_IOCTL_SMLEN) {
+							strcpy(name_ptr, relative_path);
+						}
+					} else {
+						/* It's a file path, extract the directory part */
+						last_slash = strrchr(relative_path, '/');
+						if (last_slash != NULL) {
+							/* Copy directory part including the trailing '/' */
+							dir_len = last_slash - relative_path + 1;
+							if (dir_len > 0 && dir_len < WLC_IOCTL_SMLEN) {
+								strncpy(name_ptr, relative_path, dir_len);
+								name_ptr[dir_len] = '\0';
+							}
+						}
+					}
+				}
+			} else {
+				/* Path doesn't start with /lib/firmware/, handle as before */
+				if (base_path[base_len - 1] == '/') {
+					/* It's a directory path, use it directly */
+					if (base_len < WLC_IOCTL_SMLEN) {
+						strcpy(name_ptr, base_path);
+					}
+				} else {
+					/* It's a file path, extract the directory part */
+					last_slash = strrchr(base_path, '/');
+					if (last_slash != NULL) {
+						/* Copy directory part including the trailing '/' */
+						dir_len = last_slash - base_path + 1;
+						if (dir_len > 0 && dir_len < WLC_IOCTL_SMLEN) {
+							strncpy(name_ptr, base_path, dir_len);
+							name_ptr[dir_len] = '\0';
+						}
+					}
+				}
+			}
+		}
+#endif
 #ifdef FW_AMPAK_PATH
-		strcat(name_ptr, "/");
-		strcat(name_ptr, FW_AMPAK_PATH);
+		if (name_ptr[0] == '\0') {
+			strcat(name_ptr, "/");
+			strcat(name_ptr, FW_AMPAK_PATH);
+		}
 #endif
 #ifdef MODULE_PATH
 		module_name = dhd_conf_get_module_name(dhd, DONT_CARE);
 #endif
-		if (module_name) {
+		if (module_name && name_ptr[0] == '\0') {
 			strcat(name_ptr, "/");
 			strcat(name_ptr, module_name);
 		}
-		strcat(name_ptr, "/");
+		/* If still empty, use root directory */
+		if (name_ptr[0] == '\0') {
+			strcat(name_ptr, "/");
+		}
 		strcat(name_ptr, pFilename);
 		strcpy(pFilename, path);
 	}
